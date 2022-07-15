@@ -43,6 +43,7 @@
         "test": "phpunit",
         "lint" : "php-cs-fixer fix",
         "analyse": "phpstan analyse -c phpstan.neon",
-        "check": "composer lint && composer analyse"
+        "check": "composer lint && composer analyse",
+        "post-update-cmd": "git config core.hooksPath .githooks"
       }
 }
