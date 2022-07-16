@@ -14,6 +14,7 @@ class UciQueryTest extends TestCase
 {
     public function testLoadAllQueries(): void
     {
+        Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
         UciType::$commandExecutor = new UciCommandDump();
         $query = '
@@ -44,5 +45,47 @@ class UciQueryTest extends TestCase
         $fields = (array) $uciType['fields'];
         self::assertIsArray($fields);
         self::assertTrue(count($fields) > 0);
+    }
+
+    public function testHideForbiddenFields(): void
+    {
+        Schema::clean();
+        UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciType::$commandExecutor = new UciCommandDump();
+        UciType::$forbiddenConfigurations = [
+          'network' => [
+            'loopback' => [
+              'proto',
+            ],
+          ],
+        ];
+
+        $query = '
+            {
+                uci{
+                  network{
+                    loopback{
+                      proto
+                    }
+                  }
+                }
+            }           
+            ';
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+
+        self::assertIsArray($result);
+        self::assertArrayNotHasKey('data', $result);
+        self::assertArrayHasKey('errors', $result);
+
+        $errors = (array) $result['errors'];
+        self::assertIsArray($errors);
+        self::assertTrue(count($errors) > 0);
+
+        $firstPosition = (array) $errors[0];
+        $message = $firstPosition['message'];
+        self::assertIsString($message);
+        if (is_string($message)) {
+            self::assertTrue(str_contains($message, 'Cannot query field'));
+        }
     }
 }

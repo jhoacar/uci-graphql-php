@@ -15,11 +15,15 @@ trait Loader
     /**
      * @var string
      */
-    private $method = 'getFields';
+    private static $method = 'getFields';
     /**
      * @var string
      */
-    private $interface = ILoader::class;
+    private static $cleanMethod = 'clean';
+    /**
+     * @var string
+     */
+    private static $interface = ILoader::class;
     /**
      * @var array
      */
@@ -29,27 +33,23 @@ trait Loader
      */
     private $classes = [];
     /**
-     * @var array
-     */
-    private $fieldsForbidden = [];
-    /**
      * @var string
      */
-    protected $namespace = __NAMESPACE__;
+    protected static $namespace = __NAMESPACE__;
 
     /**
      * Validate if the class complete the specifications.
      * @param string $class
      * @return bool
      */
-    private function isCorrectClass($class): bool
+    private static function isCorrectClass($class): bool
     {
         $implementations = class_implements($class);
         if (!$implementations) {
             $implementations = [];
         }
 
-        return in_array($this->interface, $implementations, true) && method_exists($class, $this->method);
+        return in_array(self::$interface, $implementations, true) && method_exists($class, self::$method);
     }
 
     /**
@@ -59,7 +59,7 @@ trait Loader
      */
     private function getResultClass($class): array
     {
-        $callable = [$class, $this->method];
+        $callable = [$class, self::$method];
         if (is_callable($callable)) {
             return (array) call_user_func($callable);
         }
@@ -75,10 +75,10 @@ trait Loader
      */
     private function searchFields(): void
     {
-        $classes = ClassFinder::getClassesInNamespace(__DIR__ . '/../', $this->namespace);
+        $classes = ClassFinder::getClassesInNamespace(__DIR__ . '/../', self::$namespace);
 
         foreach ($classes as $class) {
-            if ($this->isCorrectClass($class)) {
+            if (self::isCorrectClass($class)) {
                 $result = $this->getResultClass($class);
 
                 foreach ($result as $key => $value) {
@@ -86,6 +86,33 @@ trait Loader
                     $this->classes[$key] = $class;
                 }
             }
+        }
+    }
+
+    /**
+     * Clean all fields.
+     */
+    private static function cleanFields():void
+    {
+        $classes = ClassFinder::getClassesInNamespace(__DIR__ . '/../', self::$namespace);
+
+        foreach ($classes as $class) {
+            if (self::isCorrectClass($class)) {
+                self::cleanField($class);
+            }
+        }
+    }
+
+    /**
+     * Return the invoke clean method in that class.
+     * @param string $class
+     * @return void
+     */
+    private static function cleanField($class): void
+    {
+        $callable = [$class, self::$cleanMethod];
+        if (is_callable($callable)) {
+            call_user_func($callable);
         }
     }
 }

@@ -12,9 +12,9 @@ use UciGraphQL\ILoader;
 class UciQuery implements ILoader
 {
     /**
-     * @var UciType
+     * @var UciType|null
      */
-    private static $uci;
+    private static $uci = null;
 
     /**
      * @return UciType
@@ -34,5 +34,13 @@ class UciQuery implements ILoader
                 'type' => self::uci(),
             ],
         ];
+    }
+
+    /**
+     * Clean all fields for UCI System.
+     */
+    public static function clean(): void
+    {
+        self::$uci = null;
     }
 }

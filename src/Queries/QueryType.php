@@ -20,7 +20,7 @@ class QueryType extends ObjectType
 
     /**
      * Global instance in all the aplication.
-     * @var QueryType
+     * @var QueryType|null
      */
     private static $query = null;
 
@@ -39,12 +39,21 @@ class QueryType extends ObjectType
     }
 
     /**
+     * Clean the query builded.
+     */
+    public static function clean():void
+    {
+        self::cleanFields();
+        self::$query = null;
+    }
+
+    /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
      */
     private function __construct()
     {
-        $this->namespace = __NAMESPACE__;
+        self::$namespace = __NAMESPACE__;
         $this->searchFields();
 
         $config = [

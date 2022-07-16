@@ -16,7 +16,7 @@ class MutationType extends ObjectType
     use Loader;
 
     /**
-     * @var MutationType
+     * @var MutationType|null
      */
     private static $mutation = null;
 
@@ -35,12 +35,20 @@ class MutationType extends ObjectType
     }
 
     /**
+     * Clean the mutation builded.
+     */
+    public static function clean():void
+    {
+        self::$mutation = null;
+    }
+
+    /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
      */
     private function __construct()
     {
-        $this->namespace = __NAMESPACE__;
+        self::$namespace = __NAMESPACE__;
         $this->searchFields();
         $config = [
             'name' => 'Mutation',

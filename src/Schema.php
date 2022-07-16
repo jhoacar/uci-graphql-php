@@ -15,7 +15,7 @@ class Schema extends BaseSchema
 {
     /**
      * Global instance in all the aplication.
-     * @var Schema
+     * @var Schema|null
      */
     private static $instance = null;
 
@@ -39,5 +39,15 @@ class Schema extends BaseSchema
             'query' => QueryType::query(),
             'mutation' => MutationType::mutation(),
         ])) : self::$instance;
+    }
+
+    /**
+     * Clean all schema loaded.
+     */
+    public static function clean(): void
+    {
+        QueryType::clean();
+        MutationType::clean();
+        self::$instance = null;
     }
 }

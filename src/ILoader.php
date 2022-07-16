@@ -14,4 +14,9 @@ interface ILoader
      * @return array
      */
     public static function getFields(): array;
+
+    /**
+     * Clean all fields.
+     */
+    public static function clean():void;
 }

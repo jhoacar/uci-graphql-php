@@ -15,6 +15,7 @@ class SchemaTest extends TestCase
      */
     public function testLoadCorrectSchema() :void
     {
+        Schema::clean();
         $query = '
             query IntrospectionQuery {
                 __schema {
