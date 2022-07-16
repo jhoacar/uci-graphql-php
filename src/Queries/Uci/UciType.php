@@ -26,10 +26,14 @@ class UciType extends ObjectType
     public static $commandExecutor = null;
 
     /**
-     * Construct all the type with dinamyc schema from the UCI System.
-     * @param array $forbiddenConfigurations
+     * @var array
      */
-    public function __construct(public array $forbiddenConfigurations)
+    public static $forbiddenConfigurations = [];
+
+    /**
+     * Construct all the type with dinamyc schema from the UCI System.
+     */
+    public function __construct()
     {
         if (self::$commandExecutor === null) {
             self::$commandExecutor = new UciCommand();

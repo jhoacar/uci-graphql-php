@@ -21,31 +21,31 @@ class MutationType extends ObjectType
     private static $mutation = null;
 
     /**
+     * @var array
+     */
+    public static $customFields = [];
+
+    /**
      * Singleton Pattern.
-     * @param array $mutationFields
-     * @param array $mutationFieldsForbidden
      * @return MutationType
      */
-    public static function mutation(array $mutationFields, array $mutationFieldsForbidden)
+    public static function mutation(): self
     {
-        return self::$mutation === null ? (self::$mutation = new self($mutationFields, $mutationFieldsForbidden)) : self::$mutation;
+        return self::$mutation === null ? (self::$mutation = new self()) : self::$mutation;
     }
 
     /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
-     * @param array $customFields If an custom field match with the defined, its override
-     * @param array $fieldsForbidden If match any field so it isn't loaded in the schema
      */
-    private function __construct(array $customFields, array $fieldsForbidden)
+    private function __construct()
     {
-        $this->fieldsForbidden = $fieldsForbidden;
         $this->namespace = __NAMESPACE__;
         $this->searchFields();
         $config = [
             'name' => 'Mutation',
             'fields' => [
-                ...$this->uciFields, ...$customFields,
+                ...$this->uciFields, ...self::$customFields,
             ],
             'resolveField' => function ($val, $args, $context, ResolveInfo $info) {
                 return $this->{$info->fieldName}($val, $args, $context, $info);

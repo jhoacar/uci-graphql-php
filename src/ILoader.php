@@ -11,8 +11,7 @@ interface ILoader
 {
     /**
      * Returns all fields for GraphQL for each implementation.
-     * @param array $fieldsForbidden
      * @return array
      */
-    public static function getFields(array $fieldsForbidden): array;
+    public static function getFields(): array;
 }

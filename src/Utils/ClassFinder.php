@@ -125,6 +125,7 @@ class ClassFinder
      * A simple recursive function to list all files and subdirectories in a directory.
      * Only return the name of the files in relative path.
      * @param string $directory
+     * @param string $prefix Its used for use relative paths
      * @return array
      */
     private static function listAllFiles(string $directory, string $prefix = '')
