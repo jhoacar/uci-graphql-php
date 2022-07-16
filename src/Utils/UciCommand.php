@@ -113,7 +113,8 @@ class UciCommand extends Command
      */
     public static function getConfigurationCommand(): array
     {
-        return explode(PHP_EOL, parent::execute(self::UCI_SHOW));
+        $result = parent::execute(self::UCI_SHOW);
+        return str_contains($result, self::NOT_FOUND) ? [] : explode(PHP_EOL, $result);
     }
 
     /**
@@ -184,9 +185,9 @@ class UciCommand extends Command
      *
      *      - This array is saved with the position described by the uci system
      *
-     * - If a section is not an array, so it's saved as a stdClass
+     * - If a section is not an array, so it's saved as a UciSection
      *
-     *      - This stdClass has an attribute 'options' for each option in this section
+     *      - This UciSection has an attribute 'options' for each option in this section
      *
      * @param array|UciSection &$configSection
      * @param string $sectionName
@@ -203,7 +204,6 @@ class UciCommand extends Command
             if (empty($configSection)) {
                 $configSection = [];
             }
-
             if (is_array($configSection)) {
                 if (empty($configSection[$indexArraySection])) {
                     $configSection[$indexArraySection] = [];

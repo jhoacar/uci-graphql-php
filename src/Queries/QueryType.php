@@ -6,9 +6,7 @@ namespace UciGraphQL\Queries;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
 use UciGraphQL\Loader;
-use UciGraphQL\Utils\Command;
 
 /**
  * Class used for the global queries in GraphQL.
@@ -27,40 +25,32 @@ class QueryType extends ObjectType
     private static $query = null;
 
     /**
-     * Custom fields.
-     * @var array
-     */
-    private $customFields = [];
-
-    /**
      * Return the global instance for the queries in GraphQL.
+     * @param array $queryFields
+     * @param array $queryFieldsForbidden
      * @return QueryType
      */
-    public static function query()
+    public static function query(array $queryFields, array $queryFieldsForbidden)
     {
-        return self::$query === null ? (self::$query = new self()) : self::$query;
+        return self::$query === null ? (self::$query = new self($queryFields, $queryFieldsForbidden)) : self::$query;
     }
 
     /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
+     * @param array $customFields If an custom field match with the defined, its override
+     * @param array $fieldsForbidden If match any field so it isn't loaded in the schema
      */
-    private function __construct()
+    private function __construct(array $customFields, array $fieldsForbidden)
     {
+        $this->fieldsForbidden = $fieldsForbidden;
         $this->namespace = __NAMESPACE__;
         $this->searchFields();
-
-        $this->customFields = [
-            'whoami' => [
-                'type' => Type::string(),
-                'resolve' => fn () => Command::execute('whoami'),
-            ],
-        ];
 
         $config = [
             'name' => 'Query',
             'fields' =>  [
-                ...$this->customFields, ...$this->fields,
+                ...$this->fields, ...$customFields,
             ],
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**

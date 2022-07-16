@@ -19,16 +19,19 @@ class UciQuery implements ILoader
     /**
      * @return UciType
      */
-    private static function uci()
+    private static function uci($fieldsForbidden)
     {
-        return self::$uci === null ? (self::$uci = new UciType()) : self::$uci;
+        return self::$uci === null ? (self::$uci = new UciType($fieldsForbidden)) : self::$uci;
     }
 
-    public static function getFields(): array
+    /**
+     * {@inheritdoc}
+     */
+    public static function getFields(array $fieldsForbidden): array
     {
         return [
             'uci' => [
-                'type' => self::uci(),
+                'type' => self::uci($fieldsForbidden),
             ],
         ];
     }

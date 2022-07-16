@@ -18,19 +18,21 @@ class UciType extends ObjectType
     /**
      * @var array
      */
-    public $forbiddenConfigurations = [
-        'ucitrack' => true,
-    ];
-    /**
-     * @var array
-     */
     private $uciInfo = [];
 
     /**
-     * Construct all the type with dinamyc schema from the UCI System.
+     * @var UciCommand
      */
-    public function __construct()
+    public UciCommand $commandExecutor;
+
+    /**
+     * Construct all the type with dinamyc schema from the UCI System.
+     * @param array $fieldsForbidden
+     */
+    public function __construct(public array $forbiddenConfigurations)
     {
+        $this->commandExecutor = new UciCommand();
+
         $config = [
             'name' => 'uci',
             'description' => 'Router Configuration',
@@ -41,6 +43,8 @@ class UciType extends ObjectType
         ];
         parent::__construct($config);
     }
+
+
 
     /**
      * Return an array with unique keys for each array.
@@ -66,7 +70,7 @@ class UciType extends ObjectType
      */
     private function getUciFields(): array
     {
-        $this->uciInfo = UciCommand::getUciConfiguration();
+        $this->uciInfo = $this->commandExecutor->getUciConfiguration();
 
         $uciFields = [];
         foreach ($this->uciInfo as $configName => $sections) {

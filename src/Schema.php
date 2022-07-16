@@ -30,13 +30,17 @@ class Schema extends BaseSchema
 
     /**
      * Return the global instance for the schema in GraphQL.
+     * @param array $queryFields Default empty
+     * @param array $queryFieldsForbidden Default empty
+     * @param array $mutationFields Default empty
+     * @param array $mutationFieldsForbidden Default empty
      * @return Schema
      */
-    public static function get(): self
+    public static function get(array $queryFields = [], array $queryFieldsForbidden = [], array  $mutationFields = [], array $mutationFieldsForbidden = []): self
     {
         return self::$instance === null ? (self::$instance = new self([
-            'query' => QueryType::query(),
-            'mutation' => MutationType::mutation(),
+            'query' => QueryType::query($queryFields, $queryFieldsForbidden),
+            'mutation' => MutationType::mutation($mutationFields, $mutationFieldsForbidden),
         ])) : self::$instance;
     }
 }
