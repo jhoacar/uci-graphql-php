@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Utils;
 
-use stdClass;
-
 /**
  * Represents the Section for the UCI System.
  */
-class UciSection extends stdClass
+class UciSection
 {
     /**
      * @var array
      */
-    public $options;
+    public $options = [];
 }
 
 /**

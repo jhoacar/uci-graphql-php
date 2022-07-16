@@ -88,4 +88,51 @@ class UciQueryTest extends TestCase
             self::assertTrue(str_contains($message, 'Cannot query field'));
         }
     }
+
+    public function testLoadAllOptionsSection():void
+    {
+        Schema::clean();
+        UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciType::$commandExecutor = new UciCommandDump();
+        $query = '
+            {
+              uci{
+                dhcp{
+                  lan{
+                    start
+                  }
+                  wan{
+                    start
+                  }
+                }
+              }
+            }           
+            ';
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+
+        self::assertIsArray($result);
+        self::assertArrayHasKey('data', $result);
+        self::assertArrayNotHasKey('errors', $result);
+
+        $data = (array) $result['data'];
+        self::assertIsArray($data);
+        self::assertArrayHasKey('uci', $data);
+
+        $uci = (array) $data['uci'];
+        self::assertIsArray($uci);
+        self::assertArrayHasKey('dhcp', $uci);
+
+        $dhcp = (array) $uci['dhcp'];
+        self::assertIsArray($dhcp);
+        self::assertArrayHasKey('lan', $dhcp);
+        self::assertArrayHasKey('wan', $dhcp);
+
+        $lan = (array) $dhcp['lan'];
+        self::assertIsArray($lan);
+        self::assertArrayHasKey('start', $lan);
+
+        $wan = (array) $dhcp['wan'];
+        self::assertIsArray($wan);
+        self::assertArrayHasKey('start', $wan);
+    }
 }

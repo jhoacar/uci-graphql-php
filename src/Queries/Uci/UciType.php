@@ -166,6 +166,34 @@ class UciType extends ObjectType
     }
 
     /**
+     * Return all options available using other sections in the configuration file.
+     * @param array $sections All sections available
+     * @param array|UciSection $section Section to evaluate
+     * @return array
+     */
+    private function getAllOptions($sections, $section): array
+    {
+        if (is_array($section)) {
+            return $this->getUniqueKeys($section);
+        }
+
+        if (!($section instanceof UciSection)) {
+            return [];
+        }
+
+        $options = [];
+        foreach ($sections as $compatibleSection) {
+            if ($compatibleSection instanceof UciSection) {
+                foreach ($compatibleSection->options as $optionName => $content) {
+                    $options[$optionName] = true;
+                }
+            }
+        }
+
+        return array_keys($options);
+    }
+
+    /**
      * Return all fields in the uci configuration using GraphQL sintax.
      * @return array
      */
@@ -193,10 +221,7 @@ class UciType extends ObjectType
                     continue;
                 }
                 $sectionFields = [];
-                $isArraySection = is_array($section);
-
-                $allOptions = $isArraySection ? $this->getUniqueKeys($section) : array_keys($section->options);
-
+                $allOptions = $this->getAllOptions($sections, $section);
                 $optionsForbidden = $this->getOptionsForbidden($configName, $sectionName);
 
                 foreach ($allOptions as $optionName) {
@@ -206,7 +231,7 @@ class UciType extends ObjectType
                     $sectionFields[$optionName] = $this->getOptionType($configName, $sectionName, $optionName);
                 }
 
-                $configFields[$sectionName] = $this->getSectionType($configName, $sectionName, $sectionFields, $isArraySection);
+                $configFields[$sectionName] = $this->getSectionType($configName, $sectionName, $sectionFields, is_array($section));
             }
             $uciFields[$configName] = $this->getConfigurationType($configName, $configFields);
         }
@@ -228,7 +253,7 @@ class UciType extends ObjectType
                 'name' => $configName,
                 'fields' => $configFields,
                 'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
-                    return $value[$info->fieldName];
+                    return $value[$info->fieldName] ?? null;
                 },
             ]),
         ];
@@ -249,7 +274,7 @@ class UciType extends ObjectType
             'fields' => $sectionFields,
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
-                    return $value->options[$info->fieldName];
+                    return $value->options[$info->fieldName] ?? null;
                 } else {
                     return $value[$info->fieldName] ?? null;
                 }
@@ -261,7 +286,7 @@ class UciType extends ObjectType
             'description' => "List of $sectionName section for $configName",
             'type' => Type::listOf(new ObjectType($configObject)),
             'resolve' => function ($value, $args, $context, ResolveInfo $info) {
-                return $value[$info->fieldName];
+                return $value[$info->fieldName] ?? null;
             },
         ];
 
