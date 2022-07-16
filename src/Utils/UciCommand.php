@@ -39,7 +39,7 @@ class UciCommand extends Command
      * @param string $input
      * @return string
      */
-    private static function cleanInput(string $input): string
+    private static function cleanInput($input): string
     {
         return escapeshellcmd(escapeshellarg($input));
     }
@@ -53,7 +53,7 @@ class UciCommand extends Command
      * @param string $option to find in the section for the config
      * @return string
      */
-    public static function get(string $config, string $section, string $option): string
+    public static function get($config, $section,  $option): string
     {
         $config = self::cleanInput($config);
         $section = self::cleanInput($section);
@@ -74,7 +74,7 @@ class UciCommand extends Command
      * @param string $section
      * @return int
      */
-    private static function getIndexSection(string $section): int
+    private static function getIndexSection($section): int
     {
         $matches = [];
         $isFound = preg_match('(\[([0-9]*)\])', $section, $matches);
@@ -96,7 +96,7 @@ class UciCommand extends Command
      * @param string $section
      * @return string
      */
-    private static function getNameSection(string $section): string
+    private static function getNameSection($section): string
     {
         $matches = [];
         $isFound = preg_match('(@([\s\S]*)\[)', $section, $matches);
@@ -196,7 +196,7 @@ class UciCommand extends Command
      * @param array $content
      * @return void
      */
-    private static function getUciSection(array|UciSection &$configSection, string $sectionName, string $optionName, array $content): void
+    private static function getUciSection(&$configSection, $sectionName, $optionName, $content): void
     {
         $isArraySection = str_contains($sectionName, '@');
         $indexArraySection = $isArraySection ? self::getIndexSection($sectionName) : -1;

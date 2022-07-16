@@ -25,8 +25,8 @@ final class ClassFinderTest extends TestCase
             ],
             'expected' => [
                 'assert' => 'assertContains',
-                'needle' => $this::class,
-                'message' => 'Array must contain the ' . $this::class . ' class',
+                'needle' => ClassFinderTest::class,
+                'message' => 'Array must contain the ' . ClassFinderTest::class . ' class',
             ],
         ];
 
@@ -65,7 +65,11 @@ final class ClassFinderTest extends TestCase
      */
     public function testLoadAllClassInNamespace(array $params, array $expected)
     {
-        $classes = ClassFinder::getClassesInNamespace(...$params);
+        $composerDir = $params['composerDir'];
+        $namespace = $params['namespace'];
+        $autoloaderSection = $params['autoloaderSection'];
+        $psr = $params['psr'];
+        $classes = ClassFinder::getClassesInNamespace($composerDir, $namespace, $autoloaderSection, $psr);
 
         if ($expected['assert'] === 'assertContains') {
             self::assertContains($expected['needle'], $classes, $expected['message']);

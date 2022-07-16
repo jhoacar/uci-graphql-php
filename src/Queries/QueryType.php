@@ -49,9 +49,7 @@ class QueryType extends ObjectType
 
         $config = [
             'name' => 'Query',
-            'fields' =>  [
-                ...$this->uciFields, ...self::$customFields,
-            ],
+            'fields' =>  array_merge_recursive($this->uciFields, self::$customFields),
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields

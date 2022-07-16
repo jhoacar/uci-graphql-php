@@ -42,7 +42,7 @@ trait Loader
      * @param string $class
      * @return bool
      */
-    private function isCorrectClass(string $class): bool
+    private function isCorrectClass($class): bool
     {
         $implementations = class_implements($class);
         if (!$implementations) {
@@ -57,7 +57,7 @@ trait Loader
      * @param string $class
      * @return array
      */
-    private function getResultClass(string $class): array
+    private function getResultClass($class): array
     {
         $callable = [$class, $this->method];
         if (is_callable($callable)) {

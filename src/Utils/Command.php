@@ -14,7 +14,7 @@ class Command
      * @param string $command
      * @return string
      */
-    public static function execute(string $command): string
+    public static function execute($command): string
     {
         /* Using 2>&1 we redirect stderr to stdout */
         return shell_exec("$command 2>&1") ?: '';

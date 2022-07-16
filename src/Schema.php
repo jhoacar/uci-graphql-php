@@ -19,9 +19,10 @@ class Schema extends BaseSchema
      */
     private static $instance = null;
 
-    /*
+    /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern
+     * @param array $config
     */
     private function __construct($config)
     {
