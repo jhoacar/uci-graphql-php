@@ -35,7 +35,7 @@ class ClassFinder
         $classes = [];
         foreach ($files as $file) {
             if (str_contains($file, '.php')) {
-                $className = $namespace . '\\' . str_replace('.php', '', $file);
+                $className = self::getClassName($namespace, $file);
                 array_push($classes, $className);
             }
         }
@@ -43,6 +43,17 @@ class ClassFinder
         return array_filter($classes, function ($possibleClass) {
             return class_exists($possibleClass);
         });
+    }
+
+    /**
+     * Return correct class name using the namespace.
+     * @param string $namespace
+     * @param string $fileName
+     * @return string
+     */
+    private static function getClassName(string $namespace, string $fileName): string
+    {
+        return $namespace . '\\' . str_replace('.php', '', str_replace('/', '\\', $fileName));
     }
 
     /**
@@ -116,7 +127,7 @@ class ClassFinder
      * @param string $directory
      * @return array
      */
-    private static function listAllFiles(string $directory)
+    private static function listAllFiles(string $directory, string $prefix = '')
     {
         $scandir = scandir($directory);
         if (!$scandir) {
@@ -125,9 +136,14 @@ class ClassFinder
 
         $array = array_diff($scandir, ['.', '..']);
 
+        foreach ($array as &$item) {
+            $item = $prefix . $item;
+        }
+        unset($item);
+
         foreach ($array as $item) {
-            if (is_dir($directory . $item)) {
-                $array = array_merge($array, self::listAllFiles($item . DIRECTORY_SEPARATOR));
+            if (is_dir($directory . DIRECTORY_SEPARATOR . $item)) {
+                $array = array_merge($array, self::listAllFiles($directory . DIRECTORY_SEPARATOR . $item, $item . DIRECTORY_SEPARATOR));
             }
         }
 

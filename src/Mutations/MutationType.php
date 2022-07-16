@@ -45,7 +45,7 @@ class MutationType extends ObjectType
         $config = [
             'name' => 'Mutation',
             'fields' => [
-                ...$this->fields, ...$customFields,
+                ...$this->uciFields, ...$customFields,
             ],
             'resolveField' => function ($val, $args, $context, ResolveInfo $info) {
                 return $this->{$info->fieldName}($val, $args, $context, $info);

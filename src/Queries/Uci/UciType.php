@@ -18,12 +18,12 @@ class UciType extends ObjectType
     /**
      * @var array
      */
-    private $uciInfo = [];
+    public $uciInfo = [];
 
     /**
-     * @var UciCommand
+     * @var UciCommand|null
      */
-    public UciCommand $commandExecutor;
+    public static $commandExecutor = null;
 
     /**
      * Construct all the type with dinamyc schema from the UCI System.
@@ -31,7 +31,9 @@ class UciType extends ObjectType
      */
     public function __construct(public array $forbiddenConfigurations)
     {
-        $this->commandExecutor = new UciCommand();
+        if (self::$commandExecutor === null) {
+            self::$commandExecutor = new UciCommand();
+        }
 
         $config = [
             'name' => 'uci',
@@ -68,7 +70,11 @@ class UciType extends ObjectType
      */
     private function getUciFields(): array
     {
-        $this->uciInfo = $this->commandExecutor->getUciConfiguration();
+        if (self::$commandExecutor === null) {
+            return [];
+        }
+
+        $this->uciInfo = self::$commandExecutor->getUciConfiguration();
 
         $uciFields = [];
         foreach ($this->uciInfo as $configName => $sections) {

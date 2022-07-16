@@ -13,7 +13,7 @@ class UciCommandDump extends UciCommand
     /**
      * @var string
      */
-    public static $uciOutputCommand;
+    public static string $uciOutputCommand;
 
     /**
      * @inheritdoc
@@ -32,7 +32,7 @@ final class UciCommandTest extends TestCase
     public function uciConfigDataProvider(): iterable
     {
         yield 'allConfig' => [
-            'input' => require_once realpath(__DIR__ . '/../UciResult.php'),
+            'input' => require realpath(__DIR__ . '/../UciResult.php'),
             'expectations' => [
                 [
                     'assert' => 'assertArrayHasKey',

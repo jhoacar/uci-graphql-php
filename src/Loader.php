@@ -7,19 +7,6 @@ namespace UciGraphQL;
 use UciGraphQL\Utils\ClassFinder;
 
 /**
- * Contract to load all the fields in GraphQL.
- */
-interface ILoader
-{
-    /**
-     * Returns all fields for GraphQL for each implementation.
-     * @param array $fieldsForbidden
-     * @return array
-     */
-    public static function getFields(array $fieldsForbidden): array;
-}
-
-/**
  * Trait (class) used by dependency injection
  * to search for classes found in the namespace.
  */
@@ -36,7 +23,7 @@ trait Loader
     /**
      * @var array
      */
-    private $fields = [];
+    private $uciFields = [];
     /**
      * @var array
      */
@@ -95,7 +82,7 @@ trait Loader
                 $result = $this->getResultClass($class);
 
                 foreach ($result as $key => $value) {
-                    $this->fields[$key] = $value;
+                    $this->uciFields[$key] = $value;
                     $this->classes[$key] = $class;
                 }
             }

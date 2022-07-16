@@ -20,7 +20,7 @@ class UciQuery implements ILoader
      * @param array $fieldsForbidden
      * @return UciType
      */
-    private static function uci(array $fieldsForbidden)
+    public static function uci(array $fieldsForbidden) : UciType
     {
         return self::$uci === null ? (self::$uci = new UciType($fieldsForbidden)) : self::$uci;
     }

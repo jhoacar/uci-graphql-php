@@ -50,7 +50,7 @@ class QueryType extends ObjectType
         $config = [
             'name' => 'Query',
             'fields' =>  [
-                ...$this->fields, ...$customFields,
+                ...$this->uciFields, ...$customFields,
             ],
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**
