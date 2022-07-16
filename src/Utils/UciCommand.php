@@ -53,7 +53,7 @@ class UciCommand extends Command
      * @param string $option to find in the section for the config
      * @return string
      */
-    public static function get($config, $section,  $option): string
+    public static function get($config, $section, $option): string
     {
         $config = self::cleanInput($config);
         $section = self::cleanInput($section);

@@ -130,7 +130,7 @@ class UciType extends ObjectType
      * @param bool $isArray
      * @return array
      */
-    private function getSectionType($configName,  $sectionName,  $sectionFields,  $isArray): array
+    private function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
         $configObject = [
             'name' => $configName . '_' . $sectionName,
@@ -166,7 +166,7 @@ class UciType extends ObjectType
      * @param string $optionName
      * @return array
      */
-    private function getOptionType($configName,  $sectionName,  $optionName): array
+    private function getOptionType($configName, $sectionName, $optionName): array
     {
         return [
             'name' => $optionName,

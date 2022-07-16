@@ -21,9 +21,9 @@ class Schema extends BaseSchema
 
     /**
      * We use a private construct method for prevent instances
-     * Its called as singleton pattern
+     * Its called as singleton pattern.
      * @param array $config
-    */
+     */
     private function __construct($config)
     {
         parent::__construct($config);

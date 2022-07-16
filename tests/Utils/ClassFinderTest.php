@@ -25,8 +25,8 @@ final class ClassFinderTest extends TestCase
             ],
             'expected' => [
                 'assert' => 'assertContains',
-                'needle' => ClassFinderTest::class,
-                'message' => 'Array must contain the ' . ClassFinderTest::class . ' class',
+                'needle' => self::class,
+                'message' => 'Array must contain the ' . self::class . ' class',
             ],
         ];
 

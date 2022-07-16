@@ -22,7 +22,7 @@ class ClassFinder
      * @return array
      * @throws Throwable
      */
-    public static function getClassesInNamespace($composerDir,  $namespace,  $autoloaderSection = 'autoload',  $psr = 'psr-4'): array
+    public static function getClassesInNamespace($composerDir, $namespace, $autoloaderSection = 'autoload', $psr = 'psr-4'): array
     {
         $directory = self::getNamespaceDirectory($composerDir, $namespace, $autoloaderSection, $psr);
 
@@ -51,7 +51,7 @@ class ClassFinder
      * @param string $fileName
      * @return string
      */
-    private static function getClassName($namespace,  $fileName): string
+    private static function getClassName($namespace, $fileName): string
     {
         return $namespace . '\\' . str_replace('.php', '', str_replace('/', '\\', $fileName));
     }
@@ -64,7 +64,7 @@ class ClassFinder
      * @return array
      * @throws Throwable
      */
-    private static function getDefinedNamespaces($composerDir,  $autoloaderSection,  $psr): array
+    private static function getDefinedNamespaces($composerDir, $autoloaderSection, $psr): array
     {
         $composerJsonPath = $composerDir . 'composer.json';
         $fileContent = file_get_contents($composerJsonPath);
@@ -94,7 +94,7 @@ class ClassFinder
      * @param string $psr Default psr-4, can be other standard loaded in composer.json
      * @return string
      */
-    private static function getNamespaceDirectory($composerDir,  $namespace,  $autoloaderSection,  $psr): string
+    private static function getNamespaceDirectory($composerDir, $namespace, $autoloaderSection, $psr): string
     {
         $composerNamespaces = self::getDefinedNamespaces($composerDir, $autoloaderSection, $psr);
 
