@@ -114,6 +114,7 @@ class UciCommand extends Command
     public static function getConfigurationCommand(): array
     {
         $result = parent::execute(self::UCI_SHOW);
+
         return str_contains($result, self::NOT_FOUND) ? [] : explode(PHP_EOL, $result);
     }
 

@@ -49,7 +49,6 @@ trait Loader
      * @var string
      */
     protected $namespace = __NAMESPACE__;
-    
 
     /**
      * Validate if the class complete the specifications.
@@ -75,7 +74,7 @@ trait Loader
     {
         $callable = [$class, $this->method];
         if (is_callable($callable)) {
-            return (array) call_user_func($callable,$this->fieldsForbidden);
+            return (array) call_user_func($callable, $this->fieldsForbidden);
         }
 
         return [];

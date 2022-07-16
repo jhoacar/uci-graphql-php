@@ -27,7 +27,7 @@ class UciType extends ObjectType
 
     /**
      * Construct all the type with dinamyc schema from the UCI System.
-     * @param array $fieldsForbidden
+     * @param array $forbiddenConfigurations
      */
     public function __construct(public array $forbiddenConfigurations)
     {
@@ -43,8 +43,6 @@ class UciType extends ObjectType
         ];
         parent::__construct($config);
     }
-
-
 
     /**
      * Return an array with unique keys for each array.

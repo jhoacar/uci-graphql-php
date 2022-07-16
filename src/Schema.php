@@ -36,7 +36,7 @@ class Schema extends BaseSchema
      * @param array $mutationFieldsForbidden Default empty
      * @return Schema
      */
-    public static function get(array $queryFields = [], array $queryFieldsForbidden = [], array  $mutationFields = [], array $mutationFieldsForbidden = []): self
+    public static function get(array $queryFields = [], array $queryFieldsForbidden = [], array $mutationFields = [], array $mutationFieldsForbidden = []): self
     {
         return self::$instance === null ? (self::$instance = new self([
             'query' => QueryType::query($queryFields, $queryFieldsForbidden),
