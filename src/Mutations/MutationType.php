@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace UciGraphQL\Mutations;
 
 use GraphQL\Type\Definition\ObjectType;
@@ -27,7 +29,10 @@ class MutationType extends ObjectType
         return self::$mutation === null ? (self::$mutation = new self()) : self::$mutation;
     }
 
-    /*************** Singleton Pattern **************/
+    /**
+     * We use a private construct method for prevent instances
+     * Its called as singleton pattern.
+     */
     private function __construct()
     {
         $this->namespace = __NAMESPACE__;

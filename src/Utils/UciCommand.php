@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace UciGraphQL\Utils;
 
 use stdClass;
@@ -109,7 +111,7 @@ class UciCommand extends Command
      * Execute a command to extract all the information from the UCI System.
      * @return array
      */
-    private static function getConfigurationCommand(): array
+    public static function getConfigurationCommand(): array
     {
         return explode(PHP_EOL, parent::execute(self::UCI_SHOW));
     }
@@ -133,13 +135,26 @@ class UciCommand extends Command
         $OPTIONS = 2;
 
         $uciConfig = [];
-        $configurations = self::getConfigurationCommand();
+        // When we use 'static::' we guarantee override methods, instead of 'self::'
+        $configurations = static::getConfigurationCommand();
 
         foreach ($configurations as $info) {
-            [$info, $content] = explode('=', $info);
-            $information = explode('.', $info);
+            if (!strlen($info)) {
+                continue;
+            }
 
-            if (!strlen($info) || count($information) < 3) {
+            $division = explode('=', $info);
+
+            if (count($division) < 2) {
+                continue;
+            }
+
+            [$info, $content] = $division;
+
+            $removedBlankSpaces = preg_replace('/\s/', '', $info);
+            $information = explode('.', $removedBlankSpaces ? $removedBlankSpaces : '');
+
+            if (count($information) < 3) {
                 continue;
             }
 
@@ -173,13 +188,13 @@ class UciCommand extends Command
      *
      *      - This stdClass has an attribute 'options' for each option in this section
      *
-     * @param array &$configSection
+     * @param array|UciSection &$configSection
      * @param string $sectionName
      * @param string $optionName
      * @param array $content
      * @return void
      */
-    private static function getUciSection(array &$configSection, string $sectionName, string $optionName, array $content): void
+    private static function getUciSection(array|UciSection &$configSection, string $sectionName, string $optionName, array $content): void
     {
         $isArraySection = str_contains($sectionName, '@');
         $indexArraySection = $isArraySection ? self::getIndexSection($sectionName) : -1;
@@ -189,10 +204,12 @@ class UciCommand extends Command
                 $configSection = [];
             }
 
-            if (empty($configSection[$indexArraySection])) {
-                $configSection[$indexArraySection] = [];
+            if (is_array($configSection)) {
+                if (empty($configSection[$indexArraySection])) {
+                    $configSection[$indexArraySection] = [];
+                }
+                $configSection[$indexArraySection][$optionName] = $content;
             }
-            $configSection[$indexArraySection][$optionName] = $content;
         } else {
             if (empty($configSection)) {
                 $configSection = new UciSection();

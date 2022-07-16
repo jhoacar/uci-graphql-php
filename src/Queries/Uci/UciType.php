@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace UciGraphQL\Queries\Uci;
 
 use GraphQL\Type\Definition\ObjectType;

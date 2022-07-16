@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace UciGraphQL;
 
 use GraphQL\Type\Schema as BaseSchema;
