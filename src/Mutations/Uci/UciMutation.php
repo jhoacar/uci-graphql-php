@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace UciGraphQL\Queries\Uci;
+namespace UciGraphQL\Mutations\Uci;
 
 use UciGraphQL\ILoader;
 
 /**
  * Class used for load all the uci type in GraphQL.
  */
-class UciQuery implements ILoader
+class UciMutation implements ILoader
 {
     /**
-     * @var UciQueryType|null
+     * @var UciMutationType|null
      */
     private static $uci = null;
 
     /**
-     * @return UciQueryType
+     * @return UciMutationType
      */
-    public static function uci(): UciQueryType
+    public static function uci(): UciMutationType
     {
-        return self::$uci === null ? (self::$uci = new UciQueryType()) : self::$uci;
+        return self::$uci === null ? (self::$uci = new UciMutationType()) : self::$uci;
     }
 
     /**

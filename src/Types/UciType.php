@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace UciGraphQL\Queries\Uci;
+namespace UciGraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -15,6 +15,7 @@ use UciGraphQL\Utils\UciSection;
  */
 class UciType extends ObjectType
 {
+    use UciForbidden;
     /**
      * @var array
      */
@@ -26,30 +27,10 @@ class UciType extends ObjectType
     public static $commandExecutor = null;
 
     /**
-     * @var array|null
-     */
-    public static $forbiddenConfigurations = null;
-
-    /**
      * Construct all the type with dinamyc schema from the UCI System.
      */
-    public function __construct()
+    public function __construct($config = [])
     {
-        if (self::$commandExecutor === null) {
-            self::$commandExecutor = new UciCommand();
-        }
-
-        // var_dump(self::$forbiddenConfigurations);
-        // die;
-
-        $config = [
-            'name' => 'uci',
-            'description' => 'Router Configuration',
-            'fields' => $this->getUciFields(),
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
-                return $this->uciInfo[$info->fieldName];
-            },
-        ];
         parent::__construct($config);
     }
 
@@ -58,7 +39,7 @@ class UciType extends ObjectType
      * @param array $section
      * @return array
      */
-    private function getUniqueKeys($section): array
+    protected function getUniqueKeys($section): array
     {
         /* Load All Unique Keys for the array */
         $allOptions = [];
@@ -72,106 +53,12 @@ class UciType extends ObjectType
     }
 
     /**
-     * @return bool
-     */
-    private function isCorrectForbiddenConfigurations(): bool
-    {
-        return self::$forbiddenConfigurations !== null &&
-                is_array(self::$forbiddenConfigurations);
-    }
-
-    /**
-     * @param string $configName
-     * @return bool
-     */
-    private function isCorrectConfigForbiddenConfigurations($configName): bool
-    {
-        return $this->isCorrectForbiddenConfigurations() &&
-                isset(self::$forbiddenConfigurations[$configName]) &&
-                is_array(self::$forbiddenConfigurations[$configName]);
-    }
-
-    /**
-     * @param string $configName
-     * @param string $sectionName
-     * @return bool
-     */
-    private function isCorrectSectionForbiddenConfigurations($configName, $sectionName): bool
-    {
-        return $this->isCorrectConfigForbiddenConfigurations($configName) &&
-                isset(self::$forbiddenConfigurations[$configName][$sectionName]) &&
-                is_array(self::$forbiddenConfigurations[$configName][$sectionName]);
-    }
-
-    /**
-     * Return all configs name forbidden.
-     * @return array
-     */
-    private function getConfigsForbidden() :array
-    {
-        if (!$this->isCorrectForbiddenConfigurations()) {
-            return [];
-        }
-
-        $configsForbidden = [];
-
-        if (is_iterable(self::$forbiddenConfigurations)) {
-            foreach (self::$forbiddenConfigurations as $configName => $content) {
-                if ($content === true) {
-                    array_push($configsForbidden, $configName);
-                }
-            }
-        }
-
-        return $configsForbidden;
-    }
-
-    /**
-     * Return all sections name forbidden.
-     * @param string $configName
-     * @return array
-     */
-    private function getSectionsForbidden($configName) :array
-    {
-        if (!$this->isCorrectConfigForbiddenConfigurations($configName)) {
-            return [];
-        }
-
-        $sectionsForbidden = [];
-
-        if (isset(self::$forbiddenConfigurations[$configName]) && is_iterable(self::$forbiddenConfigurations[$configName])) {
-            foreach (self::$forbiddenConfigurations[$configName] as $sectionName => $content) {
-                if ($content === true) {
-                    array_push($sectionsForbidden, $sectionName);
-                }
-            }
-        }
-
-        return $sectionsForbidden;
-    }
-
-    /**
-     * Return all options name forbidden.
-     * @param string $configName
-     * @param string $sectionName
-     * @return array
-     */
-    private function getOptionsForbidden($configName, $sectionName) :array
-    {
-        if (!$this->isCorrectSectionForbiddenConfigurations($configName, $sectionName)) {
-            return [];
-        }
-
-        return isset(self::$forbiddenConfigurations[$configName][$sectionName]) ? self::$forbiddenConfigurations[$configName][$sectionName] : [];
-    }
-
-    /**
      * Return all options available using other sections in the configuration file.
      * @param array $sections All sections available
      * @param array|UciSection $section Section to evaluate
      * @return array
      */
-    private function getAllOptions($sections, $section): array
+    protected function getAllOptions($sections, $section): array
     {
         if (is_array($section)) {
             return $this->getUniqueKeys($section);
@@ -197,7 +84,7 @@ class UciType extends ObjectType
      * Return all fields in the uci configuration using GraphQL sintax.
      * @return array
      */
-    private function getUciFields(): array
+    protected function getUciFields(): array
     {
         if (self::$commandExecutor === null || !method_exists(self::$commandExecutor, 'getUciConfiguration')) {
             return [];
@@ -245,12 +132,12 @@ class UciType extends ObjectType
      * @param array $configFields
      * @return array
      */
-    private function getConfigurationType($configName, $configFields): array
+    protected function getConfigurationType($configName, $configFields): array
     {
         return [
             'description' => "$configName UCI Configuration",
             'type' => new ObjectType([
-                'name' => $configName,
+                'name' => 'query_' . $configName,
                 'fields' => $configFields,
                 'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                     return $value[$info->fieldName] ?? null;
@@ -267,10 +154,10 @@ class UciType extends ObjectType
      * @param bool $isArray
      * @return array
      */
-    private function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
+    protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
         $configObject = [
-            'name' => $configName . '_' . $sectionName,
+            'name' => 'query_' . $configName . '_' . $sectionName,
             'fields' => $sectionFields,
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
@@ -303,7 +190,7 @@ class UciType extends ObjectType
      * @param string $optionName
      * @return array
      */
-    private function getOptionType($configName, $sectionName, $optionName): array
+    protected function getOptionType($configName, $sectionName, $optionName): array
     {
         return [
             'name' => $optionName,
