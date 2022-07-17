@@ -18,12 +18,12 @@ class MutationType extends ObjectType
     /**
      * @var MutationType|null
      */
-    private static $mutation = null;
+    private static MutationType|null $mutation = null;
 
     /**
      * @var array
      */
-    public static $customFields = [];
+    public static array $customFields = [];
 
     /**
      * Singleton Pattern.

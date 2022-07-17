@@ -24,9 +24,6 @@ class UciMutation implements ILoader
         return self::$uci === null ? (self::$uci = new UciMutationType()) : self::$uci;
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function getFields(): array
     {
         return [

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace UciGraphQL\Queries\Uci;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use UciGraphQL\Providers\UciCommandProvider;
 use UciGraphQL\Types\UciType;
-use UciGraphQL\Utils\UciCommand;
 
 /**
  * Class used for load all schema for the UCI System in GraphQL.
@@ -18,18 +18,42 @@ class UciQueryType extends UciType
      */
     public function __construct()
     {
-        if (self::$commandExecutor === null) {
-            self::$commandExecutor = new UciCommand();
+        if (self::$provider === null) {
+            self::$provider = new UciCommandProvider();
         }
 
         $config = [
             'name' => 'query_uci',
-            'description' => 'Router Configuration',
+            'description' => 'Query in the Router Configuration',
             'fields' => $this->getUciFields(),
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 return $this->uciInfo[$info->fieldName];
             },
         ];
         parent::__construct($config);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getConfigName($configName): string
+    {
+        return 'query_' . $configName;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSectionName($configName, $sectionName): string
+    {
+        return 'query_' . $configName . '_' . $sectionName;
+    }
+
+    /*
+     * @inheritdoc
+     */
+    public function getOptionName($configName, $sectionName, $optionName): string
+    {
+        return 'query_' . $configName . '_' . $sectionName . $optionName;
     }
 }

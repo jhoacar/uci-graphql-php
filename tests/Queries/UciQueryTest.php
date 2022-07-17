@@ -16,7 +16,7 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$commandExecutor = new UciCommandDump();
+        UciQueryType::$provider = new UciCommandDump();
         $query = '
             {
                 __type(name: "query_uci") {
@@ -31,9 +31,6 @@ class UciQueryTest extends TestCase
             }           
             ';
         $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
-
-        // var_dump($result);
-        // die;
 
         self::assertIsArray($result);
         self::assertArrayHasKey('data', $result);
@@ -54,7 +51,7 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$commandExecutor = new UciCommandDump();
+        UciQueryType::$provider = new UciCommandDump();
         UciQueryType::$forbiddenConfigurations = [
           'network' => [
             'loopback' => [
@@ -96,7 +93,7 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$commandExecutor = new UciCommandDump();
+        UciQueryType::$provider = new UciCommandDump();
         $query = '
             {
               uci{

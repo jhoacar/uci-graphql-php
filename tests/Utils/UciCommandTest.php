@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace UciGraphQL\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
-use UciGraphQL\Utils\UciCommand;
-use UciGraphQL\Utils\UciSection;
+use UciGraphQL\Providers\UciCommandProvider;
+use UciGraphQL\Providers\UciSection;
 
-class UciCommandDump extends UciCommand
+class UciCommandDump extends UciCommandProvider
 {
     /**
      * @var string

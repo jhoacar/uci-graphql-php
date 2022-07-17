@@ -2,23 +2,14 @@
 
 declare(strict_types=1);
 
-namespace UciGraphQL\Utils;
+namespace UciGraphQL\Providers;
 
-/**
- * Represents the Section for the UCI System.
- */
-class UciSection
-{
-    /**
-     * @var array
-     */
-    public $options = [];
-}
+use UciGraphQL\Utils\Command;
 
 /**
  * Represents all translation from UCI Command to Array Object in PHP.
  */
-class UciCommand extends Command
+class UciCommandProvider extends UciProvider
 {
     /**
      * This is the text that shows the uci system when a resource is not found.
@@ -56,7 +47,7 @@ class UciCommand extends Command
         $config = self::cleanInput($config);
         $section = self::cleanInput($section);
         $option = self::cleanInput($option);
-        $result = parent::execute("uci get $config.$section.$option");
+        $result = Command::execute("uci get $config.$section.$option");
 
         return str_contains($result, self::NOT_FOUND) ? '' : $result;
     }
@@ -111,22 +102,13 @@ class UciCommand extends Command
      */
     public static function getConfigurationCommand(): array
     {
-        $result = parent::execute(self::UCI_SHOW);
+        $result = Command::execute(self::UCI_SHOW);
 
         return str_contains($result, self::NOT_FOUND) ? [] : explode(PHP_EOL, $result);
     }
 
     /**
-     * Return an object with the representation for the UCI System.
-     *
-     * For example:
-     *  {
-     *      app:{
-     *          port
-     *      }
-     *  }
-     *
-     * @return array
+     * @inheritdoc
      */
     public static function getUciConfiguration(): array
     {
@@ -180,21 +162,9 @@ class UciCommand extends Command
     }
 
     /**
-     * - If a section is an array is saved as a Array.
-     *
-     *      - This array is saved with the position described by the uci system
-     *
-     * - If a section is not an array, so it's saved as a UciSection
-     *
-     *      - This UciSection has an attribute 'options' for each option in this section
-     *
-     * @param array|UciSection &$configSection
-     * @param string $sectionName
-     * @param string $optionName
-     * @param array $content
-     * @return void
+     * @inheritdoc
      */
-    private static function getUciSection(&$configSection, $sectionName, $optionName, $content): void
+    protected static function getUciSection(&$configSection, $sectionName, $optionName, $content): void
     {
         $isArraySection = str_contains($sectionName, '@');
         $indexArraySection = $isArraySection ? self::getIndexSection($sectionName) : -1;

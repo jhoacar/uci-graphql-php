@@ -7,24 +7,35 @@ namespace UciGraphQL\Types;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UciGraphQL\Utils\UciCommand;
-use UciGraphQL\Utils\UciSection;
+use UciGraphQL\Providers\UciProvider;
+use UciGraphQL\Providers\UciSection;
 
 /**
  * Class used for load all schema for the UCI System in GraphQL.
  */
-class UciType extends ObjectType
+abstract class UciType extends ObjectType
 {
     use UciForbidden;
+    use UciDescription;
     /**
      * @var array
      */
-    public $uciInfo = [];
+    public array $uciInfo = [];
 
     /**
-     * @var UciCommand|null
+     * @var UciProvider|null
      */
-    public static $commandExecutor = null;
+    public static UciProvider|null $provider = null;
+
+    /**
+     * @var array
+     */
+    private array $uciConfigTypes = [];
+
+    /**
+     * @var array
+     */
+    private array $uciSectionTypes = [];
 
     /**
      * Construct all the type with dinamyc schema from the UCI System.
@@ -86,11 +97,11 @@ class UciType extends ObjectType
      */
     protected function getUciFields(): array
     {
-        if (self::$commandExecutor === null || !method_exists(self::$commandExecutor, 'getUciConfiguration')) {
+        if (self::$provider === null) {
             return [];
         }
 
-        $this->uciInfo = self::$commandExecutor->getUciConfiguration();
+        $this->uciInfo = self::$provider->getUciConfiguration();
 
         $uciFields = [];
         $configsForbidden = $this->getConfigsForbidden();
@@ -135,15 +146,58 @@ class UciType extends ObjectType
     protected function getConfigurationType($configName, $configFields): array
     {
         return [
-            'description' => "$configName UCI Configuration",
-            'type' => new ObjectType([
-                'name' => 'query_' . $configName,
-                'fields' => $configFields,
-                'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
-                    return $value[$info->fieldName] ?? null;
-                },
-            ]),
+            'description' => $this->getConfigDescription($configName),
+            'type' => $this->getUniqueConfigType($configName, $configFields),
         ];
+    }
+
+    /**
+     * Return an unique section type without repeat.
+     * @param string $configName
+     * @param string $sectionName
+     * @param array $sectionFields
+     * @return ObjectType
+     */
+    private function getUniqueSectionType($configName, $sectionName, $sectionFields): ObjectType
+    {
+        if (!empty($this->uciSectionTypes[$sectionName])) {
+            return $this->uciSectionTypes[$sectionName];
+        }
+
+        $configObject = [
+            'name' => $this->getSectionName($configName, $sectionName),
+            'fields' => $sectionFields,
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+                if ($value instanceof UciSection) {
+                    return $value->options[$info->fieldName] ?? null;
+                } else {
+                    return $value[$info->fieldName] ?? null;
+                }
+            },
+        ];
+
+        return $this->uciSectionTypes[$sectionName] = new ObjectType($configObject);
+    }
+
+    /**
+     * Return an unique config type without repeat.
+     * @param string $configName
+     * @param array $configFields
+     * @return ObjectType
+     */
+    private function getUniqueConfigType($configName, $configFields): ObjectType
+    {
+        if (!empty($this->uciConfigTypes[$configName])) {
+            return $this->uciConfigTypes[$configName];
+        }
+
+        return $this->uciConfigTypes[$configName] = new ObjectType([
+            'name' => $this->getConfigName($configName),
+            'fields' => $configFields,
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+                return $value[$info->fieldName] ?? null;
+            },
+        ]);
     }
 
     /**
@@ -156,30 +210,18 @@ class UciType extends ObjectType
      */
     protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
-        $configObject = [
-            'name' => 'query_' . $configName . '_' . $sectionName,
-            'fields' => $sectionFields,
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
-                if ($value instanceof UciSection) {
-                    return $value->options[$info->fieldName] ?? null;
-                } else {
-                    return $value[$info->fieldName] ?? null;
-                }
-            },
-        ];
-
         $configArray = [
             'name' => $sectionName,
-            'description' => "List of $sectionName section for $configName",
-            'type' => Type::listOf(new ObjectType($configObject)),
+            'description' => $this->getsectionDescription($sectionName, $configName),
+            'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
             'resolve' => function ($value, $args, $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ];
 
         return $isArray ? $configArray : [
-            'description' => "Section $sectionName for $configName",
-            'type' => new ObjectType($configObject),
+            'description' => $this->getsectionDescription($sectionName, $configName),
+            'type' => $this->getUniqueSectionType($configName, $sectionName, $sectionFields),
         ];
     }
 
@@ -194,8 +236,32 @@ class UciType extends ObjectType
     {
         return [
             'name' => $optionName,
-            'description' => "Option $optionName for $sectionName in $configName configuration",
+            'description' => $this->getOptionDescription($optionName, $sectionName, $configName),
             'type' => Type::listOf(Type::string()),
         ];
     }
+
+    /**
+     * Return correct name for the option ObjectType.
+     * @param string $configName
+     * @param string $sectionName
+     * @param string $optionName
+     * @return string
+     */
+    abstract public function getOptionName($configName, $sectionName, $optionName): string;
+
+    /**
+     * Return correct name for the section ObjectType.
+     * @param string $configName
+     * @param string $sectionName
+     * @return string
+     */
+    abstract public function getSectionName($configName, $sectionName): string;
+
+    /**
+     * Return correct name for the config ObjectType.
+     * @param string $configName
+     * @return string
+     */
+    abstract public function getConfigName($configName): string;
 }
