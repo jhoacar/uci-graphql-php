@@ -103,13 +103,48 @@ class UciMutationType extends UciType
      */
     protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
+        $arguments = array_map(function ($argument) use ($configName, $sectionName) {
+            return [
+                $argument => [
+                    'type' => Type::string(),
+                    'description' => "$argument to search in the $sectionName section in $configName configuration of the UCI System",
+                ],
+            ];
+        }, array_keys($sectionFields));
+
         $configArray = [
             'name' => $sectionName,
             'description' => $this->getsectionDescription($sectionName, $configName),
+            'args' => array_merge_recursive($arguments, [
+                'index' => [
+                    'type' => Type::int(),
+                    'description' => "Index of the array in the $sectionName section in $configName configuration of the UCI System",
+                ],
+            ]),
             'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
             'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
                 $context->isArraySection = true;
-                return $value[$info->fieldName] ?? null;
+                if (isset($args['index']) && !empty($value[$info->fieldName])) {
+                    $context->indexSection = (int) $args['index'];
+
+                    return array_slice((array) $value[$info->fieldName], (int) $args['index'], (int) $args['index'] + 1);
+                } elseif (!empty($value[$info->fieldName]) && is_array($value[$info->fieldName])) {
+                    return array_filter($value[$info->fieldName], function ($section) use ($args) {
+                        if (empty($args)) {
+                            return true;
+                        }
+                        $match = false;
+                        foreach ($args as $arg => $value) {
+                            if (isset($section[$arg]) && $section[$arg] === $value) {
+                                $match = true;
+                            }
+                        }
+
+                        return $match;
+                    });
+                } else {
+                    return null;
+                }
             },
         ];
 
@@ -118,7 +153,6 @@ class UciMutationType extends UciType
             'type' => $this->getUniqueSectionType($configName, $sectionName, $sectionFields),
         ];
     }
-
 
     /**
      * @inheritdoc
@@ -141,7 +175,7 @@ class UciMutationType extends UciType
             'type' => Type::listOf(Type::string()),
             'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
                 [$uci,$config,$section,$option] = $info->path;
-                // return $this->provider->dispatchAction($args['action'], $config, $section, $option, $args['value']);
+            // return $this->provider->dispatchAction($args['action'], $config, $section, $option, $args['value']);
             },
         ];
     }
