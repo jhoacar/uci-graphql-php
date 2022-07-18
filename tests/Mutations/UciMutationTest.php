@@ -121,4 +121,25 @@ class UciMutationTest extends TestCase
             self::assertTrue(str_contains($message, 'Cannot query field'));
         }
     }
+
+    public function testLoadAllArgsMutations(): void
+    {
+        Schema::clean();
+        UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciMutation::uci([], new UciCommandDump());
+
+        $mutation = '
+        mutation{
+          uci{
+            network{
+              loopback{
+                proto(action: SET, value: "otro")
+              }
+            }
+          }
+        }';
+        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray();
+        var_dump($result);
+        self::assertTrue(true);
+    }
 }

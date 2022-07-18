@@ -97,6 +97,14 @@ abstract class UciType extends ObjectType
     }
 
     /**
+     * @param array $uciInfo
+     */
+    public function setUciInfo($uciInfo): void
+    {
+        $this->uciInfo = $uciInfo;
+    }
+
+    /**
      * Return all fields in the uci configuration using GraphQL sintax.
      * @return array
      */
@@ -183,6 +191,7 @@ abstract class UciType extends ObjectType
 
         return $this->uciSectionTypes[$sectionName] = new ObjectType($configObject);
     }
+    
 
     /**
      * Return an unique config type without repeat.

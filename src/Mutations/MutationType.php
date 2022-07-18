@@ -22,6 +22,7 @@ class MutationType extends ObjectType
 
     /**
      * Singleton Pattern.
+     * @param array $customFields
      * @return MutationType
      */
     public static function mutation($customFields = []): self

@@ -15,7 +15,7 @@ class ClassFinder
      * Search all classes defined in the namespace using autoloading
      * based in psr-4 standard, only serach in the directory and a level
      * for subdirectories.
-     * @param string $composerDir This value should be the directory that contains composer.json. Important: must end in '/'
+     * @param string $composerDir This value should be the directory that contains composer.json
      * @param string $namespace The namespace to search
      * @param string $autoloaderSection Default autoload, can be other section autoloader loaded in composer.json, for example 'autoload-dev'
      * @param string $psr Default psr-4, can be other standard loaded in composer.json
@@ -24,6 +24,10 @@ class ClassFinder
      */
     public static function getClassesInNamespace($composerDir, $namespace, $autoloaderSection = 'autoload', $psr = 'psr-4'): array
     {
+        if (substr($composerDir, strlen($composerDir) - 1) !== '/') {
+            $composerDir .= '/';
+        }
+
         $directory = self::getNamespaceDirectory($composerDir, $namespace, $autoloaderSection, $psr);
 
         if (!strlen($directory)) {

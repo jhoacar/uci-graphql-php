@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Providers;
 
+use UciGraphQL\Mutations\Uci\UciMutation;
+use UciGraphQL\Queries\Uci\UciQuery;
 use UciGraphQL\Utils\Command;
 
 /**
@@ -190,5 +192,18 @@ class UciCommandProvider extends UciProvider
                 $configSection->options[$optionName] = $content;
             }
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function dispatchAction($action, $config, $section, $option, $value): array
+    {
+        var_dump($action);
+
+        UciQuery::uci()->setUciInfo(self::getUciConfiguration());
+        UciMutation::uci()->setUciInfo(self::getUciConfiguration());
+
+        return ['puto'];
     }
 }

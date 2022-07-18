@@ -9,7 +9,7 @@ trait UciForbidden
     /**
      * @var array|null
      */
-    public $forbiddenConfigurations = null;
+    protected $forbiddenConfigurations = null;
 
     /**
      * @return bool

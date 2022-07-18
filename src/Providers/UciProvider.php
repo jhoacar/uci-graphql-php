@@ -5,6 +5,19 @@ declare(strict_types=1);
 namespace UciGraphQL\Providers;
 
 /**
+ * Represents each action in the uci information.
+ */
+enum ACTIONS
+{
+    case SET;
+    case DELETE;
+    case RENAME;
+    case ADD_LIST;
+    case DEL_LIST;
+    case REVERT;
+}
+
+/**
  * Represents the Section for the UCI System.
  */
 class UciSection
@@ -50,4 +63,15 @@ abstract class UciProvider
      * @return void
      */
     abstract protected static function getUciSection(&$configSection, $sectionName, $optionName, $content): void;
+
+    /**
+     * Execute the action in the uci system.
+     * @param ACTIONS $action
+     * @param string $config
+     * @param string $section
+     * @param string $option
+     * @param string $value
+     * @return array
+     */
+    abstract public function dispatchAction($action, $config, $section, $option, $value): array;
 }
