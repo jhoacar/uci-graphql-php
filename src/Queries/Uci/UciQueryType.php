@@ -6,6 +6,7 @@ namespace UciGraphQL\Queries\Uci;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use UciGraphQL\Providers\UciCommandProvider;
+use UciGraphQL\Providers\UciProvider;
 use UciGraphQL\Types\UciType;
 
 /**
@@ -14,13 +15,14 @@ use UciGraphQL\Types\UciType;
 class UciQueryType extends UciType
 {
     /**
+     * @param array $forbiddenConfigurations
+     * @param UciProvider|null $provider
      * Construct all the type with dinamyc schema from the UCI System.
      */
-    public function __construct()
+    public function __construct($forbiddenConfigurations = [], $provider = null)
     {
-        if (self::$provider === null) {
-            self::$provider = new UciCommandProvider();
-        }
+        $this->provider = $provider === null ? new UciCommandProvider() : $provider;
+        $this->forbiddenConfigurations = $forbiddenConfigurations;
 
         $config = [
             'name' => 'query_uci',

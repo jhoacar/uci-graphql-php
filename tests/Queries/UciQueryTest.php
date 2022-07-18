@@ -6,7 +6,7 @@ namespace UciGraphQL\Tests\Queries;
 
 use GraphQL\GraphQL;
 use PHPUnit\Framework\TestCase;
-use UciGraphQL\Queries\Uci\UciQueryType;
+use UciGraphQL\Queries\Uci\UciQuery;
 use UciGraphQL\Schema;
 use UciGraphQL\Tests\Utils\UciCommandDump;
 
@@ -16,7 +16,7 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$provider = new UciCommandDump();
+        UciQuery::uci([], new UciCommandDump());
         $query = '
             {
                 __type(name: "query_uci") {
@@ -51,15 +51,14 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$provider = new UciCommandDump();
-        UciQueryType::$forbiddenConfigurations = [
+        $forbiddenConfigurations = [
           'network' => [
             'loopback' => [
               'proto',
             ],
           ],
         ];
-
+        UciQuery::uci($forbiddenConfigurations, new UciCommandDump());
         $query = '
             {
                 uci{
@@ -93,7 +92,7 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
-        UciQueryType::$provider = new UciCommandDump();
+        UciQuery::uci([], new UciCommandDump());
         $query = '
             {
               uci{

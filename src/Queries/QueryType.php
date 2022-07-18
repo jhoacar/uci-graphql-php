@@ -22,12 +22,12 @@ class QueryType extends ObjectType
      * Global instance in all the aplication.
      * @var QueryType|null
      */
-    private static QueryType|null $query = null;
+    private static $query = null;
 
     /**
      * @var array
      */
-    public static array $customFields = [];
+    public static $customFields = [];
 
     /**
      * Return the global instance for the queries in GraphQL.

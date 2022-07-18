@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace UciGraphQL\Queries\Uci;
 
 use UciGraphQL\ILoader;
+use UciGraphQL\Providers\UciProvider;
 
 /**
  * Class used for load all the uci type in GraphQL.
@@ -17,11 +18,13 @@ class UciQuery implements ILoader
     private static $uci = null;
 
     /**
+     * @param array $forbiddenConfigurations
+     * @param UciProvider|null $provider
      * @return UciQueryType
      */
-    public static function uci(): UciQueryType
+    public static function uci($forbiddenConfigurations = [], $provider = null): UciQueryType
     {
-        return self::$uci === null ? (self::$uci = new UciQueryType()) : self::$uci;
+        return self::$uci === null ? (self::$uci = new UciQueryType($forbiddenConfigurations, $provider)) : self::$uci;
     }
 
     /**

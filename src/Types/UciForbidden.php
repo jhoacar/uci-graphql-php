@@ -9,15 +9,15 @@ trait UciForbidden
     /**
      * @var array|null
      */
-    public static $forbiddenConfigurations = null;
+    public $forbiddenConfigurations = null;
 
     /**
      * @return bool
      */
     protected function isCorrectForbiddenConfigurations(): bool
     {
-        return self::$forbiddenConfigurations !== null &&
-                is_array(self::$forbiddenConfigurations);
+        return $this->forbiddenConfigurations !== null &&
+                is_array($this->forbiddenConfigurations);
     }
 
     /**
@@ -27,8 +27,8 @@ trait UciForbidden
     protected function isCorrectConfigForbiddenConfigurations($configName): bool
     {
         return $this->isCorrectForbiddenConfigurations() &&
-                isset(self::$forbiddenConfigurations[$configName]) &&
-                is_array(self::$forbiddenConfigurations[$configName]);
+                isset($this->forbiddenConfigurations[$configName]) &&
+                is_array($this->forbiddenConfigurations[$configName]);
     }
 
     /**
@@ -39,8 +39,8 @@ trait UciForbidden
     protected function isCorrectSectionForbiddenConfigurations($configName, $sectionName): bool
     {
         return $this->isCorrectConfigForbiddenConfigurations($configName) &&
-                isset(self::$forbiddenConfigurations[$configName][$sectionName]) &&
-                is_array(self::$forbiddenConfigurations[$configName][$sectionName]);
+                isset($this->forbiddenConfigurations[$configName][$sectionName]) &&
+                is_array($this->forbiddenConfigurations[$configName][$sectionName]);
     }
 
     /**
@@ -55,8 +55,8 @@ trait UciForbidden
 
         $configsForbidden = [];
 
-        if (is_iterable(self::$forbiddenConfigurations)) {
-            foreach (self::$forbiddenConfigurations as $configName => $content) {
+        if (is_iterable($this->forbiddenConfigurations)) {
+            foreach ($this->forbiddenConfigurations as $configName => $content) {
                 if ($content === true) {
                     array_push($configsForbidden, $configName);
                 }
@@ -79,8 +79,8 @@ trait UciForbidden
 
         $sectionsForbidden = [];
 
-        if (isset(self::$forbiddenConfigurations[$configName]) && is_iterable(self::$forbiddenConfigurations[$configName])) {
-            foreach (self::$forbiddenConfigurations[$configName] as $sectionName => $content) {
+        if (isset($this->forbiddenConfigurations[$configName]) && is_iterable($this->forbiddenConfigurations[$configName])) {
+            foreach ($this->forbiddenConfigurations[$configName] as $sectionName => $content) {
                 if ($content === true) {
                     array_push($sectionsForbidden, $sectionName);
                 }
@@ -102,6 +102,6 @@ trait UciForbidden
             return [];
         }
 
-        return isset(self::$forbiddenConfigurations[$configName][$sectionName]) ? self::$forbiddenConfigurations[$configName][$sectionName] : [];
+        return isset($this->forbiddenConfigurations[$configName][$sectionName]) ? $this->forbiddenConfigurations[$configName][$sectionName] : [];
     }
 }

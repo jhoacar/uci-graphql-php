@@ -6,6 +6,7 @@ namespace UciGraphQL\Mutations\Uci;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use UciGraphQL\Providers\UciCommandProvider;
+use UciGraphQL\Providers\UciProvider;
 use UciGraphQL\Types\UciType;
 
 /**
@@ -13,15 +14,19 @@ use UciGraphQL\Types\UciType;
  */
 class UciMutationType extends UciType
 {
-    public function __construct()
+    /**
+     * @param array $forbiddenConfigurations
+     * @param UciProvider|null $provider
+     * Construct all the type with dinamyc schema from the UCI System.
+     */
+    public function __construct($forbiddenConfigurations = [], $provider = null)
     {
-        if (self::$provider === null) {
-            self::$provider = new UciCommandProvider();
-        }
+        $this->provider = $provider === null ? new UciCommandProvider() : $provider;
+        $this->forbiddenConfigurations = $forbiddenConfigurations;
 
         $config = [
             'name' => 'mutation_uci',
-            'description' => 'Router Configuration',
+            'description' => 'Mutation for the Router Configuration',
             'fields' => $this->getUciFields(),
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 return $this->uciInfo[$info->fieldName];
@@ -51,6 +56,6 @@ class UciMutationType extends UciType
      */
     public function getOptionName($configName, $sectionName, $optionName): string
     {
-        return 'mutation_' .  $configName . '_' . $sectionName . $optionName;
+        return 'mutation_' . $configName . '_' . $sectionName . '_' . $optionName;
     }
 }

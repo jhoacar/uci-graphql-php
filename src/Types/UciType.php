@@ -20,22 +20,27 @@ abstract class UciType extends ObjectType
     /**
      * @var array
      */
-    public array $uciInfo = [];
+    public $uciInfo = [];
 
     /**
      * @var UciProvider|null
      */
-    public static UciProvider|null $provider = null;
+    protected $provider = null;
 
     /**
      * @var array
      */
-    private array $uciConfigTypes = [];
+    private $uciConfigTypes = [];
 
     /**
      * @var array
      */
-    private array $uciSectionTypes = [];
+    private $uciSectionTypes = [];
+
+    /**
+     * @var array
+     */
+    protected $uciFields = [];
 
     /**
      * Construct all the type with dinamyc schema from the UCI System.
@@ -97,13 +102,13 @@ abstract class UciType extends ObjectType
      */
     protected function getUciFields(): array
     {
-        if (self::$provider === null) {
+        if ($this->provider === null) {
             return [];
         }
 
-        $this->uciInfo = self::$provider->getUciConfiguration();
+        $this->uciInfo = $this->provider->getUciConfiguration();
 
-        $uciFields = [];
+        $this->uciFields = [];
         $configsForbidden = $this->getConfigsForbidden();
 
         foreach ($this->uciInfo as $configName => $sections) {
@@ -131,10 +136,10 @@ abstract class UciType extends ObjectType
 
                 $configFields[$sectionName] = $this->getSectionType($configName, $sectionName, $sectionFields, is_array($section));
             }
-            $uciFields[$configName] = $this->getConfigurationType($configName, $configFields);
+            $this->uciFields[$configName] = $this->getConfigurationType($configName, $configFields);
         }
 
-        return $uciFields;
+        return $this->uciFields;
     }
 
     /**

@@ -18,12 +18,12 @@ class MutationType extends ObjectType
     /**
      * @var MutationType|null
      */
-    private static MutationType|null $mutation = null;
+    private static $mutation = null;
 
     /**
      * @var array
      */
-    public static array $customFields = [];
+    public static $customFields = [];
 
     /**
      * Singleton Pattern.
@@ -39,6 +39,7 @@ class MutationType extends ObjectType
      */
     public static function clean():void
     {
+        self::cleanFields();
         self::$mutation = null;
     }
 
