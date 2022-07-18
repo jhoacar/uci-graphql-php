@@ -8,7 +8,8 @@
                                    |_|        |__|      
 
 </pre>
-
+[![Latest Stable Version](https://poser.pugx.org/jhoacar/uci-graphql-php/v/stable?format=flat)](https://packagist.org/packages/jhoacar/uci-graphql-php)
+[![Total Downloads](https://poser.pugx.org/jhoacar/uci-graphql-php/downloads?format=flat)](https://packagist.org/packages/jhoacar/uci-graphql-php)
 [![CI](https://github.com/jhoacar/uci-graphql-php/workflows/CI/badge.svg)](https://github.com/jhoacar/uci-graphql-php/actions?query=workflow:CI+branch:master)
 
 This is a PHP implementation of the UCI System from OpenWRT [specification](https://openwrt.org/docs/guide-user/base-system/uci)
@@ -19,7 +20,7 @@ based on the [reference implementation in JavaScript](https://github.com/webonyx
 Via composer:
 
 ```sh
-composer require jhoacar11/uci-graphql-php
+composer require jhoacar/uci-graphql-php
 ```
 
 ## Documentation
