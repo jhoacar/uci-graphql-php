@@ -2,6 +2,14 @@
     "name": "jhoacar/uci-graphql-php",
     "description": "A PHP implementation for the UCI System using GraphQL",
     "type": "library",
+    "authors": [
+        {
+            "name": "Jhoan Carrero",
+            "email": "carrerojhoan@gmail.com",
+            "homepage": "https://github.com/jhoacar",
+            "role": "Lead"
+        }
+    ],
     "license": "MIT",
     "homepage": "https://github.com/jhoacar/uci-graphql-php",
     "keywords": [
@@ -41,8 +49,8 @@
     },
     "scripts": {
         "test": "phpunit tests",
-        "lint" : "php-cs-fixer fix",
+        "lint": "php-cs-fixer fix",
         "analyse": "phpstan analyse -c phpstan.neon",
         "check": "composer lint && composer analyse"
-      }
+    }
 }
