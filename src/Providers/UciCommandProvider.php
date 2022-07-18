@@ -197,13 +197,41 @@ class UciCommandProvider extends UciProvider
     /**
      * @inheritdoc
      */
-    public function dispatchAction($action, $config, $section, $option, $value): array
+    public function dispatchAction($action, $config, $section, $indexSection, $option, $value): array
     {
-        var_dump($action);
+        $config = self::cleanInput($config);
+        $section = self::cleanInput($section);
+        $option = self::cleanInput($option);
+        $value = self::cleanInput($value);
+        // Extract the name in the enum class and convert to lower case for the uci command
+        $verb = strtolower($action->name);
+
+        if ($indexSection === parent::IS_OBJECT_SECTION) {
+            Command::execute("uci $verb $config.$section.$option=$value");
+        } elseif ($indexSection === parent::ALL_INDEXES_SECTION) {
+            $allIndexes = count(UciMutation::uci()->uciInfo[$config][$section]);
+            foreach (range(0, $allIndexes - 1) as $index) {
+                Command::execute("uci $verb $config.@$section[$index].$option=$value");
+            }
+        } else {
+            Command::execute("uci $verb $config.@$section[$indexSection].$option=$value");
+        }
+
+        Command::execute("uci commit $config");
+        Command::execute("/etc/init.d/$config restart");
 
         UciQuery::uci()->setUciInfo(self::getUciConfiguration());
         UciMutation::uci()->setUciInfo(self::getUciConfiguration());
 
-        return ['puto'];
+        $result = [];
+
+        $section = UciQuery::uci()->uciInfo[$config][$section];
+        if ($indexSection === parent::IS_OBJECT_SECTION && $section instanceof UciSection) {
+            $result = $section->options[$option];
+        } elseif (is_array($section) && $indexSection >= 0) {
+            $result = $section[$indexSection][$option];
+        }
+
+        return $result;
     }
 }

@@ -34,6 +34,15 @@ class UciSection
 abstract class UciProvider
 {
     /**
+     * This constant load all options in each section.
+     */
+    const ALL_INDEXES_SECTION = -5;
+    /**
+     * This constant is for represent that is an array.
+     */
+    const IS_OBJECT_SECTION = -10;
+
+    /**
      * Return an object with the representation for the UCI System.
      *
      * For example:
@@ -69,9 +78,10 @@ abstract class UciProvider
      * @param ACTIONS $action
      * @param string $config
      * @param string $section
+     * @param int $indexSection
      * @param string $option
      * @param string $value
      * @return array
      */
-    abstract public function dispatchAction($action, $config, $section, $option, $value): array;
+    abstract public function dispatchAction($action, $config, $section, $indexSection, $option, $value): array;
 }

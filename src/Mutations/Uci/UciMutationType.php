@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Mutations\Uci;
 
+use Context;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -66,7 +67,7 @@ class UciMutationType extends UciType
             'name' => 'mutation_uci',
             'description' => 'Mutation for the Router Configuration',
             'fields' => $this->getUciFields(),
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
                 return $this->uciInfo[$info->fieldName];
             },
         ];
@@ -100,6 +101,28 @@ class UciMutationType extends UciType
     /**
      * @inheritdoc
      */
+    protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
+    {
+        $configArray = [
+            'name' => $sectionName,
+            'description' => $this->getsectionDescription($sectionName, $configName),
+            'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
+            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
+                $context->isArraySection = true;
+                return $value[$info->fieldName] ?? null;
+            },
+        ];
+
+        return $isArray ? $configArray : [
+            'description' => $this->getsectionDescription($sectionName, $configName),
+            'type' => $this->getUniqueSectionType($configName, $sectionName, $sectionFields),
+        ];
+    }
+
+
+    /**
+     * @inheritdoc
+     */
     protected function getOptionType($configName, $sectionName, $optionName): array
     {
         return [
@@ -116,9 +139,9 @@ class UciMutationType extends UciType
             ],
             'description' => $this->getOptionDescription($optionName, $sectionName, $configName),
             'type' => Type::listOf(Type::string()),
-            'resolve' => function ($value, $args, $context, ResolveInfo $info) {
+            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
                 [$uci,$config,$section,$option] = $info->path;
-                return $this->provider->dispatchAction($args['action'], $config, $section, $option, $args['value']);
+                // return $this->provider->dispatchAction($args['action'], $config, $section, $option, $args['value']);
             },
         ];
     }

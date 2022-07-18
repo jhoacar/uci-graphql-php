@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Types;
 
+use Context;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -30,12 +31,12 @@ abstract class UciType extends ObjectType
     /**
      * @var array
      */
-    private $uciConfigTypes = [];
+    protected $uciConfigTypes = [];
 
     /**
      * @var array
      */
-    private $uciSectionTypes = [];
+    protected $uciSectionTypes = [];
 
     /**
      * @var array
@@ -171,7 +172,7 @@ abstract class UciType extends ObjectType
      * @param array $sectionFields
      * @return ObjectType
      */
-    private function getUniqueSectionType($configName, $sectionName, $sectionFields): ObjectType
+    protected function getUniqueSectionType($configName, $sectionName, $sectionFields): ObjectType
     {
         if (!empty($this->uciSectionTypes[$sectionName])) {
             return $this->uciSectionTypes[$sectionName];
@@ -180,7 +181,7 @@ abstract class UciType extends ObjectType
         $configObject = [
             'name' => $this->getSectionName($configName, $sectionName),
             'fields' => $sectionFields,
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
                     return $value->options[$info->fieldName] ?? null;
                 } else {
@@ -191,7 +192,6 @@ abstract class UciType extends ObjectType
 
         return $this->uciSectionTypes[$sectionName] = new ObjectType($configObject);
     }
-    
 
     /**
      * Return an unique config type without repeat.
@@ -199,7 +199,7 @@ abstract class UciType extends ObjectType
      * @param array $configFields
      * @return ObjectType
      */
-    private function getUniqueConfigType($configName, $configFields): ObjectType
+    protected function getUniqueConfigType($configName, $configFields): ObjectType
     {
         if (!empty($this->uciConfigTypes[$configName])) {
             return $this->uciConfigTypes[$configName];
@@ -208,7 +208,7 @@ abstract class UciType extends ObjectType
         return $this->uciConfigTypes[$configName] = new ObjectType([
             'name' => $this->getConfigName($configName),
             'fields' => $configFields,
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ]);
@@ -228,7 +228,7 @@ abstract class UciType extends ObjectType
             'name' => $sectionName,
             'description' => $this->getsectionDescription($sectionName, $configName),
             'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
-            'resolve' => function ($value, $args, $context, ResolveInfo $info) {
+            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ];
