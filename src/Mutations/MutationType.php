@@ -21,17 +21,12 @@ class MutationType extends ObjectType
     private static $mutation = null;
 
     /**
-     * @var array
-     */
-    public static $customFields = [];
-
-    /**
      * Singleton Pattern.
      * @return MutationType
      */
-    public static function mutation(): self
+    public static function mutation($customFields = []): self
     {
-        return self::$mutation === null ? (self::$mutation = new self()) : self::$mutation;
+        return self::$mutation === null ? (self::$mutation = new self($customFields)) : self::$mutation;
     }
 
     /**
@@ -46,18 +41,27 @@ class MutationType extends ObjectType
     /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
+     * @param array $customFields
      */
-    private function __construct()
+    private function __construct($customFields = [])
     {
         self::$namespace = __NAMESPACE__;
         $this->searchFields();
         $config = [
             'name' => 'Mutation',
-            'fields' => [
-                ...$this->uciFields, ...self::$customFields,
-            ],
-            'resolveField' => function ($val, $args, $context, ResolveInfo $info) {
-                return $this->{$info->fieldName}($val, $args, $context, $info);
+            'fields' =>  array_merge_recursive($this->uciFields, $customFields),
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+                /**
+                 * Execute this function load the root value for the fields
+                 * If a method in this class has the name 'resolve' . $fieldName
+                 * is called for resolve, empty string for the root value otherwise.
+                 */
+                $method = 'resolve' . ucfirst($info->fieldName);
+                if (method_exists($this, $method)) {
+                    return $this->{$method}($value, $args, $context, $info);
+                } else {
+                    return '';
+                }
             },
         ];
         parent::__construct($config);

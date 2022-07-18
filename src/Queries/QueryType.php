@@ -25,17 +25,13 @@ class QueryType extends ObjectType
     private static $query = null;
 
     /**
-     * @var array
-     */
-    public static $customFields = [];
-
-    /**
      * Return the global instance for the queries in GraphQL.
+     * @param array $customFields
      * @return QueryType
      */
-    public static function query()
+    public static function query($customFields = []): self
     {
-        return self::$query === null ? (self::$query = new self()) : self::$query;
+        return self::$query === null ? (self::$query = new self($customFields)) : self::$query;
     }
 
     /**
@@ -50,15 +46,16 @@ class QueryType extends ObjectType
     /**
      * We use a private construct method for prevent instances
      * Its called as singleton pattern.
+     * @param array $customFields
      */
-    private function __construct()
+    private function __construct($customFields = [])
     {
         self::$namespace = __NAMESPACE__;
         $this->searchFields();
 
         $config = [
             'name' => 'Query',
-            'fields' =>  array_merge_recursive($this->uciFields, self::$customFields),
+            'fields' =>  array_merge_recursive($this->uciFields, $customFields),
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields
