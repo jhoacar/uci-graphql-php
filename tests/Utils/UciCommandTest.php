@@ -38,12 +38,13 @@ class UciCommandDump extends UciCommandProvider
             $result = $section[$indexSection][$option];
         }
 
-        switch ($action) {
-            case ACTIONS::SET:
-                return array_merge($result, [$value]);
+        $action = strtolower($action);
+
+        if ($action === ACTIONS::SET) {
+            return array_merge($result, [$value]);
         }
 
-        return [$value];
+        return ['Must be specified a correct action'];
     }
 }
 

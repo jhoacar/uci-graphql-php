@@ -180,6 +180,7 @@ abstract class UciType extends ObjectType
 
         $configObject = [
             'name' => $this->getSectionName($configName, $sectionName),
+            'description' => $this->getsectionDescription($sectionName, $configName),
             'fields' => $sectionFields,
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
@@ -207,11 +208,30 @@ abstract class UciType extends ObjectType
 
         return $this->uciConfigTypes[$configName] = new ObjectType([
             'name' => $this->getConfigName($configName),
+            'description' => $this->getConfigDescription($configName),
             'fields' => $configFields,
             'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ]);
+    }
+
+    /**
+     * @param string $string
+     * @return bool
+     */
+    protected function isRegexString($string): bool
+    {
+        return preg_match("/^\/.+\/[a-z]*$/i", $string) === 1;
+    }
+
+    /**
+     * @param string $string
+     * @return string
+     */
+    protected function cleanRegexString($string): string
+    {
+        return strtolower(str_replace('\'', '', $string));
     }
 
     /**
@@ -237,14 +257,30 @@ abstract class UciType extends ObjectType
             if ($context !== null) {
                 $context->indexSection = (int) $args['index'];
             }
+            if ((int) $args['index'] >= count($value[$info->fieldName])) {
+                return null;
+            }
 
             return array_slice((array) $value[$info->fieldName], (int) $args['index'], (int) $args['index'] + 1);
         } elseif (!empty($value[$info->fieldName]) && is_array($value[$info->fieldName])) {
             return array_filter($value[$info->fieldName], function ($section) use ($args) {
                 $match = false;
                 foreach ($args as $arg => $value) {
-                    if (isset($section[$arg]) && $section[$arg] === $value) {
-                        $match = true;
+                    if (isset($section[$arg])) {
+                        foreach ($section[$arg] as $sectionToSearch) {
+                            if ($this->isRegexString($value)) {
+                                if (preg_match($value, $sectionToSearch)) {
+                                    $match = true;
+                                }
+                            } else {
+                                $value = $this->cleanRegexString($value);
+                                $sectionToSearch = $this->cleanRegexString($sectionToSearch);
+
+                                if (str_contains($sectionToSearch, $value)) {
+                                    $match = true;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -265,14 +301,17 @@ abstract class UciType extends ObjectType
      */
     protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
-        $arguments = array_map(function ($argument) use ($configName, $sectionName) {
-            return [
-                $argument => [
-                    'type' => Type::string(),
+        $arguments = array_reduce(array_keys($sectionFields), function ($prev, $argument) use ($configName, $sectionName) {
+            if ($prev === null) {
+                $prev = [];
+            }
+            $prev[$argument] = [
+                'type' => Type::string(),
                     'description' => "$argument to search in the $sectionName section in $configName configuration of the UCI System",
-                ],
             ];
-        }, array_keys($sectionFields));
+
+            return $prev;
+        });
 
         $configArray = [
             'name' => $sectionName,

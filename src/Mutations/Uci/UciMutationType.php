@@ -107,7 +107,7 @@ class UciMutationType extends UciType
             'name' => $optionName,
             'args' => [
                 'action' => [
-                    'type' => Type::nonNull($this->actionEnum),
+                    'type' => $this->actionEnum,
                     'description' => 'Action to execute in this option',
                 ],
                 'value' => [

@@ -123,7 +123,7 @@ class UciMutationTest extends TestCase
         }
     }
 
-    public function testLoadAllArgsMutations(): void
+    public function testLoadSetArgMutations(): void
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
@@ -141,7 +141,78 @@ class UciMutationTest extends TestCase
           }
         }';
         $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray(true);
-        // var_dump($result);
-        self::assertTrue(true);
+
+        self::assertIsArray($result);
+        self::assertArrayHasKey('data', $result);
+        self::assertArrayNotHasKey('errors', $result);
+
+        $data = (array) $result['data'];
+        self::assertIsArray($data);
+        self::assertArrayHasKey('uci', $data);
+
+        $uci = (array) $data['uci'];
+        self::assertIsArray($uci);
+        self::assertArrayHasKey('network', $uci);
+
+        $network = (array) $uci['network'];
+        self::assertIsArray($network);
+        self::assertArrayHasKey('loopback', $network);
+
+        $loopback = (array) $network['loopback'];
+        self::assertIsArray($loopback);
+        self::assertArrayHasKey('proto', $loopback);
+
+        $proto = (array) $loopback['proto'];
+        self::assertIsArray($proto);
+        self::assertContains('otro', $proto);
+    }
+
+    public function testFilterSection():void
+    {
+        Schema::clean();
+        UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciMutation::uci([], new UciCommandDump());
+        UciQuery::uci([], new UciCommandDump());
+
+        $mutation = '
+        mutation {
+          uci{
+            firewall{
+              rule(name: "/(Allow)/i"){
+                name(action: SET, value: "other name")
+              }
+            }
+          }   
+        }
+        ';
+        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray(true);
+
+        self::assertIsArray($result);
+        self::assertArrayHasKey('data', $result);
+        self::assertArrayNotHasKey('errors', $result);
+
+        $data = (array) $result['data'];
+        self::assertIsArray($data);
+        self::assertArrayHasKey('uci', $data);
+
+        $uci = (array) $data['uci'];
+        self::assertIsArray($uci);
+        self::assertArrayHasKey('firewall', $uci);
+
+        $firewall = (array) $uci['firewall'];
+        self::assertIsArray($firewall);
+        self::assertArrayHasKey('rule', $firewall);
+
+        $rule = (array) $firewall['rule'];
+        self::assertIsArray($rule);
+        self::assertTrue(count($rule) > 0, 'Must have at least one rule');
+
+        $firstRule = (array) $rule[0];
+        self::assertIsArray($firstRule);
+        self::assertArrayHasKey('name', $firstRule);
+
+        $name = (array) $firstRule['name'];
+        self::assertIsArray($name);
+        self::assertContains('other name', $name);
     }
 }
