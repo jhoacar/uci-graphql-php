@@ -181,7 +181,7 @@ abstract class UciType extends ObjectType
         $configObject = [
             'name' => $this->getSectionName($configName, $sectionName),
             'fields' => $sectionFields,
-            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
                     return $value->options[$info->fieldName] ?? null;
                 } else {
@@ -208,7 +208,7 @@ abstract class UciType extends ObjectType
         return $this->uciConfigTypes[$configName] = new ObjectType([
             'name' => $this->getConfigName($configName),
             'fields' => $configFields,
-            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ]);
@@ -222,7 +222,7 @@ abstract class UciType extends ObjectType
      * @param ResolveInfo $info
      * @return array|null
      */
-    protected function filterResolverArraySection($value, $args, Context|null $context, ResolveInfo $info): array|null
+    protected function filterResolverArraySection($value, $args, $context, ResolveInfo $info)
     {
         if ($context !== null) {
             $context->isArraySection = true;
@@ -284,7 +284,7 @@ abstract class UciType extends ObjectType
                 ],
             ]),
             'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
-            'resolve' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolve' => function ($value, $args, $context, ResolveInfo $info) {
                 return $this->filterResolverArraySection($value, $args, $context, $info);
             },
         ];

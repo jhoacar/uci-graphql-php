@@ -6,7 +6,6 @@ namespace UciGraphQL\Queries;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
-use UciGraphQL\Context;
 use UciGraphQL\Loader;
 use UciGraphQL\Queries\Uci\UciQuery;
 use UciGraphQL\Utils\ArrayMerge;
@@ -62,7 +61,7 @@ class QueryType extends ObjectType
         $config = [
             'name' => 'Query',
             'fields' =>  ArrayMerge::merge_arrays(UciQuery::getFields(), $customFields),
-            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields
                  * If a method in this class has the name 'resolve' . $fieldName

@@ -7,7 +7,6 @@ namespace UciGraphQL\Mutations\Uci;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use UciGraphQL\Context;
 use UciGraphQL\Providers\ACTIONS;
 use UciGraphQL\Providers\UciCommandProvider;
 use UciGraphQL\Providers\UciProvider;
@@ -68,7 +67,7 @@ class UciMutationType extends UciType
             'name' => 'mutation_uci',
             'description' => 'Mutation for the Router Configuration',
             'fields' => $this->getUciFields(),
-            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 return $this->uciInfo[$info->fieldName];
             },
         ];
@@ -118,7 +117,7 @@ class UciMutationType extends UciType
             ],
             'description' => $this->getOptionDescription($optionName, $sectionName, $configName),
             'type' => Type::listOf(Type::string()),
-            'resolve' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolve' => function ($value, $args, $context, ResolveInfo $info) {
                 [$uci , $config, $section, $option ] = $info->path;
                 $config = !is_array($config) ? (string) $config : '';
                 $section = !is_array($section) ? (string) $section : '';

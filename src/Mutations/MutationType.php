@@ -6,7 +6,6 @@ namespace UciGraphQL\Mutations;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
-use UciGraphQL\Context;
 use UciGraphQL\Loader;
 use UciGraphQL\Mutations\Uci\UciMutation;
 use UciGraphQL\Utils\ArrayMerge;
@@ -57,7 +56,7 @@ class MutationType extends ObjectType
         $config = [
             'name' => 'Mutation',
             'fields' =>  ArrayMerge::merge_arrays(UciMutation::getFields(), $customFields),
-            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields
                  * If a method in this class has the name 'resolve' . $fieldName

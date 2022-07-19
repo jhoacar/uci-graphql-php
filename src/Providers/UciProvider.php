@@ -7,14 +7,14 @@ namespace UciGraphQL\Providers;
 /**
  * Represents each action in the uci information.
  */
-enum ACTIONS
+abstract class ACTIONS
 {
-    case SET;
-    case DELETE;
-    case RENAME;
-    case ADD_LIST;
-    case DEL_LIST;
-    case REVERT;
+    const SET = 'set';
+    const DELETE = 'delete';
+    const RENAME = 'rename';
+    const ADD_LIST = 'add_list';
+    const DEL_LIST = 'del_list';
+    const REVERT = 'revert';
 }
 
 /**
@@ -75,7 +75,7 @@ abstract class UciProvider
 
     /**
      * Execute the action in the uci system.
-     * @param ACTIONS $action
+     * @param string $action
      * @param string $config
      * @param string $section
      * @param int $indexSection

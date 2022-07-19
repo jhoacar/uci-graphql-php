@@ -119,7 +119,7 @@ class UciCommandProvider extends UciProvider
         $OPTIONS = 2;
 
         $uciConfig = [];
-        
+
         // When we use 'static::' we guarantee override methods, instead of 'self::'
         $configurations = static::getConfigurationCommand();
 
@@ -205,7 +205,7 @@ class UciCommandProvider extends UciProvider
         $optionCleaned = self::cleanInput($option);
         $valueCleaned = self::cleanInput($value);
         // Extract the name in the enum class and convert to lower case for the uci command
-        $verb = strtolower($action->name);
+        $verb = strtolower($action);
 
         $commandToExecute = '';
         if ($indexSection === parent::IS_OBJECT_SECTION) {
