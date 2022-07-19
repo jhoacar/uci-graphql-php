@@ -1,4 +1,5 @@
 vendor
 composer.lock
+.phpdoc
 .phpunit.result.cache
 .php-cs-fixer.cache
