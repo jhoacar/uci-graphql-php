@@ -25,7 +25,7 @@ composer require jhoacar/uci-graphql-php
 
 ## Documentation
 
-Full documentation is available at [https://jhoacar.github.io/uci-graphql-php](https://jhoacar.github.io/uci-graphql-php)
+Full documentation is available at [https://jhoacar.github.io/uci-graphql-php/](https://jhoacar.github.io/uci-graphql-php/)
 
 If you don't know what GraphQL is, visit the [official website](http://graphql.org) first.
 
