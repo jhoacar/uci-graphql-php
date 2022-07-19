@@ -6,7 +6,10 @@ namespace UciGraphQL\Tests;
 
 use GraphQL\GraphQL;
 use PHPUnit\Framework\TestCase;
+use UciGraphQL\Mutations\Uci\UciMutation;
+use UciGraphQL\Queries\Uci\UciQuery;
 use UciGraphQL\Schema;
+use UciGraphQL\Tests\Utils\UciCommandDump;
 
 class SchemaTest extends TestCase
 {
@@ -16,6 +19,8 @@ class SchemaTest extends TestCase
     public function testLoadCorrectSchema() :void
     {
         Schema::clean();
+        UciMutation::uci([], new UciCommandDump());
+        UciQuery::uci([], new UciCommandDump());
         $query = '
             query IntrospectionQuery {
                 __schema {
@@ -28,7 +33,7 @@ class SchemaTest extends TestCase
                 }
             }           
             ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayHasKey('data', $result);

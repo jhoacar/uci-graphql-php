@@ -119,6 +119,7 @@ class UciCommandProvider extends UciProvider
         $OPTIONS = 2;
 
         $uciConfig = [];
+        
         // When we use 'static::' we guarantee override methods, instead of 'self::'
         $configurations = static::getConfigurationCommand();
 
@@ -199,26 +200,44 @@ class UciCommandProvider extends UciProvider
      */
     public function dispatchAction($action, $config, $section, $indexSection, $option, $value): array
     {
-        $config = self::cleanInput($config);
-        $section = self::cleanInput($section);
-        $option = self::cleanInput($option);
-        $value = self::cleanInput($value);
+        $configCleaned = self::cleanInput($config);
+        $sectionCleaned = self::cleanInput($section);
+        $optionCleaned = self::cleanInput($option);
+        $valueCleaned = self::cleanInput($value);
         // Extract the name in the enum class and convert to lower case for the uci command
         $verb = strtolower($action->name);
 
+        $commandToExecute = '';
         if ($indexSection === parent::IS_OBJECT_SECTION) {
-            Command::execute("uci $verb $config.$section.$option=$value");
+            $commandToExecute = "uci $verb $configCleaned.$sectionCleaned.$optionCleaned=$valueCleaned;";
         } elseif ($indexSection === parent::ALL_INDEXES_SECTION) {
-            $allIndexes = count(UciMutation::uci()->uciInfo[$config][$section]);
+            $allIndexes = count(UciMutation::uci()->uciInfo[$configCleaned][$sectionCleaned]);
             foreach (range(0, $allIndexes - 1) as $index) {
-                Command::execute("uci $verb $config.@$section[$index].$option=$value");
+                $commandToExecute .= "uci $verb $configCleaned.@$sectionCleaned[$index].$optionCleaned=$valueCleaned;";
             }
         } else {
-            Command::execute("uci $verb $config.@$section[$indexSection].$option=$value");
+            $commandToExecute = "uci $verb $configCleaned.@$sectionCleaned[$indexSection].$optionCleaned=$valueCleaned;";
         }
 
-        Command::execute("uci commit $config");
-        Command::execute("/etc/init.d/$config restart");
+        $resultCode = 0;
+
+        $resultCommand = Command::execute($commandToExecute, $resultCode);
+
+        if ($resultCode !== Command::NO_ERRORS) {
+            return [$resultCommand];
+        }
+
+        $resultCommand = Command::execute("uci commit $configCleaned", $resultCode);
+
+        if ($resultCode !== Command::NO_ERRORS) {
+            return [$resultCommand];
+        }
+
+        $resultCommand = Command::execute("/etc/init.d/$configCleaned restart", $resultCode);
+
+        if ($resultCode !== Command::NO_ERRORS) {
+            return [$resultCommand];
+        }
 
         UciQuery::uci()->setUciInfo(self::getUciConfiguration());
         UciMutation::uci()->setUciInfo(self::getUciConfiguration());

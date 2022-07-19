@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace UciGraphQL\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
+use UciGraphQL\Providers\ACTIONS;
 use UciGraphQL\Providers\UciCommandProvider;
 use UciGraphQL\Providers\UciSection;
 
@@ -21,6 +22,28 @@ class UciCommandDump extends UciCommandProvider
     public static function getConfigurationCommand(): array
     {
         return explode(PHP_EOL, self::$uciOutputCommand);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function dispatchAction($action, $config, $section, $indexSection, $option, $value): array
+    {
+        $result = [];
+
+        $section = self::getUciConfiguration()[$config][$section];
+        if ($indexSection === parent::IS_OBJECT_SECTION && $section instanceof UciSection) {
+            $result = $section->options[$option];
+        } elseif (is_array($section) && $indexSection >= 0) {
+            $result = $section[$indexSection][$option];
+        }
+
+        switch ($action) {
+            case ACTIONS::SET:
+                return array_merge($result, [$value]);
+        }
+
+        return [$value];
     }
 }
 

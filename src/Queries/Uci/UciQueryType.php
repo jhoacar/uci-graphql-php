@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace UciGraphQL\Queries\Uci;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use UciGraphQL\Context;
 use UciGraphQL\Providers\UciCommandProvider;
 use UciGraphQL\Providers\UciProvider;
 use UciGraphQL\Types\UciType;
@@ -28,8 +29,8 @@ class UciQueryType extends UciType
             'name' => 'query_uci',
             'description' => 'Query in the Router Configuration',
             'fields' => $this->getUciFields(),
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
-                return $this->uciInfo[$info->fieldName];
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+                return $this->uciInfo[$info->fieldName] ?? null;
             },
         ];
         parent::__construct($config);

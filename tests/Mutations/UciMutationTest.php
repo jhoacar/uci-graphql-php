@@ -18,8 +18,9 @@ class UciMutationTest extends TestCase
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
         UciMutation::uci([], new UciCommandDump());
+        UciQuery::uci([], new UciCommandDump());
 
-        $query = '
+        $mutation = '
             {
                 __type(name: "mutation_uci") {
                     name
@@ -32,7 +33,7 @@ class UciMutationTest extends TestCase
                   }
             }
             ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayHasKey('data', $result);
@@ -50,7 +51,7 @@ class UciMutationTest extends TestCase
         self::assertTrue(count($fields) > 0);
     }
 
-    public function testHideForbiddenFields(): void
+    public function testHideMutationForbiddenFields(): void
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
@@ -80,7 +81,7 @@ class UciMutationTest extends TestCase
           }
         }
         ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayNotHasKey('data', $result);
@@ -104,7 +105,7 @@ class UciMutationTest extends TestCase
           }
         }           
         ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayNotHasKey('data', $result);
@@ -127,6 +128,7 @@ class UciMutationTest extends TestCase
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
         UciMutation::uci([], new UciCommandDump());
+        UciQuery::uci([], new UciCommandDump());
 
         $mutation = '
         mutation{
@@ -138,8 +140,8 @@ class UciMutationTest extends TestCase
             }
           }
         }';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray();
-        var_dump($result);
+        $result = (array) GraphQL::executeQuery(Schema::get(), $mutation)->toArray(true);
+        // var_dump($result);
         self::assertTrue(true);
     }
 }

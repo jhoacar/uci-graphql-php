@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Mutations\Uci;
 
-use Context;
 use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use UciGraphQL\Context;
 use UciGraphQL\Providers\ACTIONS;
 use UciGraphQL\Providers\UciCommandProvider;
 use UciGraphQL\Providers\UciProvider;
@@ -60,6 +60,7 @@ class UciMutationType extends UciType
                 ],
             ],
         ]);
+
         $this->provider = $provider === null ? new UciCommandProvider() : $provider;
         $this->forbiddenConfigurations = $forbiddenConfigurations;
 
@@ -67,7 +68,7 @@ class UciMutationType extends UciType
             'name' => 'mutation_uci',
             'description' => 'Mutation for the Router Configuration',
             'fields' => $this->getUciFields(),
-            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
                 return $this->uciInfo[$info->fieldName];
             },
         ];
@@ -101,69 +102,13 @@ class UciMutationType extends UciType
     /**
      * @inheritdoc
      */
-    protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
-    {
-        $arguments = array_map(function ($argument) use ($configName, $sectionName) {
-            return [
-                $argument => [
-                    'type' => Type::string(),
-                    'description' => "$argument to search in the $sectionName section in $configName configuration of the UCI System",
-                ],
-            ];
-        }, array_keys($sectionFields));
-
-        $configArray = [
-            'name' => $sectionName,
-            'description' => $this->getsectionDescription($sectionName, $configName),
-            'args' => array_merge_recursive($arguments, [
-                'index' => [
-                    'type' => Type::int(),
-                    'description' => "Index of the array in the $sectionName section in $configName configuration of the UCI System",
-                ],
-            ]),
-            'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
-            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
-                $context->isArraySection = true;
-                if (isset($args['index']) && !empty($value[$info->fieldName])) {
-                    $context->indexSection = (int) $args['index'];
-
-                    return array_slice((array) $value[$info->fieldName], (int) $args['index'], (int) $args['index'] + 1);
-                } elseif (!empty($value[$info->fieldName]) && is_array($value[$info->fieldName])) {
-                    return array_filter($value[$info->fieldName], function ($section) use ($args) {
-                        if (empty($args)) {
-                            return true;
-                        }
-                        $match = false;
-                        foreach ($args as $arg => $value) {
-                            if (isset($section[$arg]) && $section[$arg] === $value) {
-                                $match = true;
-                            }
-                        }
-
-                        return $match;
-                    });
-                } else {
-                    return null;
-                }
-            },
-        ];
-
-        return $isArray ? $configArray : [
-            'description' => $this->getsectionDescription($sectionName, $configName),
-            'type' => $this->getUniqueSectionType($configName, $sectionName, $sectionFields),
-        ];
-    }
-
-    /**
-     * @inheritdoc
-     */
     protected function getOptionType($configName, $sectionName, $optionName): array
     {
         return [
             'name' => $optionName,
             'args' => [
                 'action' => [
-                    'type' => $this->actionEnum,
+                    'type' => Type::nonNull($this->actionEnum),
                     'description' => 'Action to execute in this option',
                 ],
                 'value' => [
@@ -173,9 +118,19 @@ class UciMutationType extends UciType
             ],
             'description' => $this->getOptionDescription($optionName, $sectionName, $configName),
             'type' => Type::listOf(Type::string()),
-            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
-                [$uci,$config,$section,$option] = $info->path;
-            // return $this->provider->dispatchAction($args['action'], $config, $section, $option, $args['value']);
+            'resolve' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+                [$uci , $config, $section, $option ] = $info->path;
+                $config = !is_array($config) ? (string) $config : '';
+                $section = !is_array($section) ? (string) $section : '';
+                $option = !is_array($option) ? (string) $option : '';
+
+                $indexSection = $context !== null ? $context->indexSection : UciProvider::IS_OBJECT_SECTION;
+
+                if ($this->provider !== null) {
+                    return $this->provider->dispatchAction($args['action'], $config, $section, $indexSection, $option, $args['value']);
+                }
+
+                return ['uci provider is null'];
             },
         ];
     }

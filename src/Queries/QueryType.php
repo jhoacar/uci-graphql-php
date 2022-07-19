@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Queries;
 
-use Context;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
+use UciGraphQL\Context;
 use UciGraphQL\Loader;
+use UciGraphQL\Queries\Uci\UciQuery;
+use UciGraphQL\Utils\ArrayMerge;
 
 /**
  * Class used for the global queries in GraphQL.
@@ -40,7 +42,10 @@ class QueryType extends ObjectType
      */
     public static function clean():void
     {
-        self::cleanFields();
+
+        // self::cleanFields();
+        // self::$namespace = __NAMESPACE__;
+        UciQuery::clean();
         self::$query = null;
     }
 
@@ -56,8 +61,8 @@ class QueryType extends ObjectType
 
         $config = [
             'name' => 'Query',
-            'fields' =>  array_merge_recursive($this->uciFields, $customFields),
-            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
+            'fields' =>  ArrayMerge::merge_arrays(UciQuery::getFields(), $customFields),
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields
                  * If a method in this class has the name 'resolve' . $fieldName

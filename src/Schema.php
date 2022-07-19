@@ -17,7 +17,7 @@ class Schema extends BaseSchema
      * Global instance in all the aplication.
      * @var Schema|null
      */
-    private static $instance = null;
+    public static $instance = null;
 
     /**
      * We use a private construct method for prevent instances

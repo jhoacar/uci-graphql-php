@@ -6,7 +6,10 @@ namespace UciGraphQL\Mutations;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
+use UciGraphQL\Context;
 use UciGraphQL\Loader;
+use UciGraphQL\Mutations\Uci\UciMutation;
+use UciGraphQL\Utils\ArrayMerge;
 
 class MutationType extends ObjectType
 {
@@ -35,7 +38,9 @@ class MutationType extends ObjectType
      */
     public static function clean():void
     {
-        self::cleanFields();
+        // self::$namespace = __NAMESPACE__;
+        // self::cleanFields();
+        UciMutation::clean();
         self::$mutation = null;
     }
 
@@ -48,10 +53,11 @@ class MutationType extends ObjectType
     {
         self::$namespace = __NAMESPACE__;
         $this->searchFields();
+
         $config = [
             'name' => 'Mutation',
-            'fields' =>  array_merge_recursive($this->uciFields, $customFields),
-            'resolveField' => function ($value, $args, $context, ResolveInfo $info) {
+            'fields' =>  ArrayMerge::merge_arrays(UciMutation::getFields(), $customFields),
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
                 /**
                  * Execute this function load the root value for the fields
                  * If a method in this class has the name 'resolve' . $fieldName

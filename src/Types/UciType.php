@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace UciGraphQL\Types;
 
-use Context;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use UciGraphQL\Context;
 use UciGraphQL\Providers\UciProvider;
 use UciGraphQL\Providers\UciSection;
 
@@ -181,7 +181,7 @@ abstract class UciType extends ObjectType
         $configObject = [
             'name' => $this->getSectionName($configName, $sectionName),
             'fields' => $sectionFields,
-            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
                 if ($value instanceof UciSection) {
                     return $value->options[$info->fieldName] ?? null;
                 } else {
@@ -208,10 +208,51 @@ abstract class UciType extends ObjectType
         return $this->uciConfigTypes[$configName] = new ObjectType([
             'name' => $this->getConfigName($configName),
             'fields' => $configFields,
-            'resolveField' => function ($value, $args, Context $context, ResolveInfo $info) {
+            'resolveField' => function ($value, $args, Context|null $context, ResolveInfo $info) {
                 return $value[$info->fieldName] ?? null;
             },
         ]);
+    }
+
+    /**
+     * Resolve the array using filters.
+     * @param array $value
+     * @param array $args
+     * @param Context|null $context
+     * @param ResolveInfo $info
+     * @return array|null
+     */
+    protected function filterResolverArraySection($value, $args, Context|null $context, ResolveInfo $info): array|null
+    {
+        if ($context !== null) {
+            $context->isArraySection = true;
+        }
+        if (empty($args)) {
+            if ($context !== null) {
+                $context->indexSection = UciProvider::ALL_INDEXES_SECTION;
+            }
+
+            return $value[$info->fieldName] ?? null;
+        } elseif (isset($args['index']) && !empty($value[$info->fieldName])) {
+            if ($context !== null) {
+                $context->indexSection = (int) $args['index'];
+            }
+
+            return array_slice((array) $value[$info->fieldName], (int) $args['index'], (int) $args['index'] + 1);
+        } elseif (!empty($value[$info->fieldName]) && is_array($value[$info->fieldName])) {
+            return array_filter($value[$info->fieldName], function ($section) use ($args) {
+                $match = false;
+                foreach ($args as $arg => $value) {
+                    if (isset($section[$arg]) && $section[$arg] === $value) {
+                        $match = true;
+                    }
+                }
+
+                return $match;
+            });
+        }
+
+        return null;
     }
 
     /**
@@ -224,12 +265,27 @@ abstract class UciType extends ObjectType
      */
     protected function getSectionType($configName, $sectionName, $sectionFields, $isArray): array
     {
+        $arguments = array_map(function ($argument) use ($configName, $sectionName) {
+            return [
+                $argument => [
+                    'type' => Type::string(),
+                    'description' => "$argument to search in the $sectionName section in $configName configuration of the UCI System",
+                ],
+            ];
+        }, array_keys($sectionFields));
+
         $configArray = [
             'name' => $sectionName,
             'description' => $this->getsectionDescription($sectionName, $configName),
+            'args' => array_merge($arguments, [
+                'index' => [
+                    'type' => Type::int(),
+                    'description' => "Index of the array in the $sectionName section in $configName configuration of the UCI System",
+                ],
+            ]),
             'type' => Type::listOf($this->getUniqueSectionType($configName, $sectionName, $sectionFields)),
-            'resolve' => function ($value, $args, Context $context, ResolveInfo $info) {
-                return $value[$info->fieldName] ?? null;
+            'resolve' => function ($value, $args, Context|null $context, ResolveInfo $info) {
+                return $this->filterResolverArraySection($value, $args, $context, $info);
             },
         ];
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace UciGraphQL;
+
 use UciGraphQL\Providers\UciProvider;
 
 class Context

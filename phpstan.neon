@@ -8,6 +8,3 @@ parameters:
         
     inferPrivatePropertyTypeFromConstructor: true
     checkMissingIterableValueType: false
-
-    #ignoreErrors:
-    #    - '#Cannot call method dispatchAction\(\) on UciGraphQL\\Providers\\UciProvider\|null#'

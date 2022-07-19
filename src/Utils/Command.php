@@ -9,14 +9,24 @@ namespace UciGraphQL\Utils;
  */
 class Command
 {
+    const NO_ERRORS = 0;
+
     /**
      * Return a string with the stdoutput and stderr for the command executed.
      * @param string $command
+     * @param int &$result_code [optional]
+     * If the return_var argument is present along with the output argument, then the return status of the executed command will be written to this variable.
      * @return string
      */
-    public static function execute($command): string
+    public static function execute($command, &$result_code = self::NO_ERRORS): string
     {
-        /* Using 2>&1 we redirect stderr to stdout */
-        return shell_exec("$command 2>&1") ?: '';
+        $output = [];
+        exec($command, $output, $result_code);
+        $result = '';
+        foreach ($output as $line) {
+            $result .= $line . PHP_EOL;
+        }
+
+        return $result;
     }
 }

@@ -6,6 +6,7 @@ namespace UciGraphQL\Tests\Queries;
 
 use GraphQL\GraphQL;
 use PHPUnit\Framework\TestCase;
+use UciGraphQL\Mutations\Uci\UciMutation;
 use UciGraphQL\Queries\Uci\UciQuery;
 use UciGraphQL\Schema;
 use UciGraphQL\Tests\Utils\UciCommandDump;
@@ -16,7 +17,9 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciMutation::uci([], new UciCommandDump());
         UciQuery::uci([], new UciCommandDump());
+
         $query = '
             {
                 __type(name: "query_uci") {
@@ -30,7 +33,7 @@ class UciQueryTest extends TestCase
                   }
             }           
             ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayHasKey('data', $result);
@@ -44,13 +47,14 @@ class UciQueryTest extends TestCase
 
         $fields = (array) $uciType['fields'];
         self::assertIsArray($fields);
-        self::assertTrue(count($fields) > 0);
+        self::assertTrue(count($fields) > 0, 'Query uci need a field');
     }
 
-    public function testHideForbiddenFields(): void
+    public function testHideQueryForbiddenFields(): void
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+
         $forbiddenConfigurations = [
           'network' => [
             'loopback' => [
@@ -59,6 +63,7 @@ class UciQueryTest extends TestCase
           ],
         ];
         UciQuery::uci($forbiddenConfigurations, new UciCommandDump());
+        UciMutation::uci([], new UciCommandDump());
         $query = '
             {
                 uci{
@@ -70,7 +75,7 @@ class UciQueryTest extends TestCase
                 }
             }           
             ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayNotHasKey('data', $result);
@@ -92,22 +97,19 @@ class UciQueryTest extends TestCase
     {
         Schema::clean();
         UciCommandDump::$uciOutputCommand = require realpath(__DIR__ . '/../UciResult.php');
+        UciMutation::uci([], new UciCommandDump());
         UciQuery::uci([], new UciCommandDump());
         $query = '
             {
-              uci{
+              uci{    
                 dhcp{
-                  lan{
-                    start
-                  }
-                  wan{
-                    start
-                  }
+                  lan{start}
+                  wan{start}
                 }
               }
             }           
             ';
-        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray();
+        $result = (array) GraphQL::executeQuery(Schema::get(), $query)->toArray(true);
 
         self::assertIsArray($result);
         self::assertArrayHasKey('data', $result);
