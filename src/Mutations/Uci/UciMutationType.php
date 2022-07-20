@@ -133,4 +133,12 @@ class UciMutationType extends UciType
             },
         ];
     }
+
+    /**
+     * @return UciProvider
+     */
+    public function getProvider()
+    {
+        return $this->provider;
+    }
 }

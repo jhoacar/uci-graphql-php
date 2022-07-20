@@ -43,6 +43,11 @@ abstract class UciProvider
     const IS_OBJECT_SECTION = -10;
 
     /**
+     * @var array
+     */
+    protected $services = [];
+
+    /**
      * Return an object with the representation for the UCI System.
      *
      * For example:
@@ -84,4 +89,13 @@ abstract class UciProvider
      * @return array
      */
     abstract public function dispatchAction($action, $config, $section, $indexSection, $option, $value): array;
+
+    /**
+     * Return an array with services to restart.
+     * @return array
+     */
+    public function getServices(): array
+    {
+        return $this->services;
+    }
 }
