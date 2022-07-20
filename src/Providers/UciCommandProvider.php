@@ -36,6 +36,16 @@ class UciCommandProvider extends UciProvider
     }
 
     /**
+     * Return a string to use in a value for the uci command.
+     * @param string $value
+     * @return string
+     */
+    private function cleanUciValue($value)
+    {
+        return escapeshellarg($value);
+    }
+
+    /**
      * Return the output for the specified resource
      * Validate the each field used as input
      * Also if the resource is not found return an empty string.
@@ -203,7 +213,7 @@ class UciCommandProvider extends UciProvider
         $configCleaned = self::cleanInput($config);
         $sectionCleaned = self::cleanInput($section);
         $optionCleaned = self::cleanInput($option);
-        $valueCleaned = self::cleanInput($value);
+        $valueCleaned = self::cleanUciValue($value);
         // Extract the name in the enum class and convert to lower case for the uci command
         $verb = strtolower($action);
 
@@ -233,11 +243,7 @@ class UciCommandProvider extends UciProvider
             return [$resultCommand];
         }
 
-        $resultCommand = Command::execute("/etc/init.d/$configCleaned restart", $resultCode);
-
-        if ($resultCode !== Command::NO_ERRORS) {
-            return [$resultCommand];
-        }
+        array_push($this->services, $configCleaned);
 
         UciQuery::uci()->setUciInfo(self::getUciConfiguration());
         UciMutation::uci()->setUciInfo(self::getUciConfiguration());
