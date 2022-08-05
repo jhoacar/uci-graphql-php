@@ -110,9 +110,9 @@ class ClassFinder
             $possibleNamespace = implode('\\', $namespaceFragments) . '\\';
 
             if (array_key_exists($possibleNamespace, $composerNamespaces)) {
-                $realpath = realpath($composerDir . $composerNamespaces[$possibleNamespace] . implode('/', $undefinedNamespaceFragments));
+                $realpath = $composerDir . $composerNamespaces[$possibleNamespace] . implode('/', $undefinedNamespaceFragments);
 
-                if (!$realpath) {
+                if (!file_exists($realpath)) {
                     return '';
                 }
 
